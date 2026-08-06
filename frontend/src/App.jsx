@@ -1,7 +1,7 @@
 // src/App.jsx
 import React, { useState } from 'react';
 
-const API_BASE = "http://127.0.0.1:8000/api";
+const API_BASE = "https://smart-hospital-system-3.onrender.com/api/chatbot"; 
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('chatbot');
