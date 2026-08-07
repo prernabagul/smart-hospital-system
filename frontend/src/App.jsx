@@ -38,48 +38,96 @@ export default function App() {
   };
 
   const handlePredictRisk = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/predict-risk`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(vitals)
-      });
-      setRiskResult(await res.json());
-    } catch (err) {
-      alert("Error connecting to backend!");
-    }
-  };
+  try {
+    // 1. Convert string input fields in vitals to numbers (if needed)
+    const formattedVitals = {
+      age: Number(vitals.age),
+      bmi: Number(vitals.bmi),
+      glucose: Number(vitals.glucose),
+      blood_pressure: Number(vitals.blood_pressure || vitals.bloodPressure)
+    };
 
-  const handleReportUpload = async () => {
-    if (!selectedFile) return;
+    const res = await fetch(`${API_BASE}/predict-risk`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formattedVitals)
+    });
+
+    const data = await res.json();
+
+    // 2. Check if backend returned an error status (like 404 or 422)
+    if (!res.ok) {
+      console.error("Backend Error Response:", data);
+      alert(`API Error (${res.status}): ${JSON.stringify(data.detail)}`);
+      return;
+    }
+
+    // 3. Success! Set the result
+    setRiskResult(data);
+
+  } catch (err) {
+    console.error("Network Error:", err);
+    alert("Error connecting to backend!");
+  }
+};
+
+  const handleReportUpload = async (e) => {
+  if (e) e.preventDefault();
+
+  try {
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    // 'file' must match the parameter name expected in your FastAPI endpoint (e.g., file: UploadFile)
+    formData.append('file', selectedFile); 
 
-    try {
-      const res = await fetch(`${API_BASE}/analyze-report`, { method: 'POST', body: formData });
-      setReportResult(await res.json());
-    } catch (err) {
-      alert("Error connecting to backend!");
-    }
-  };
+    const res = await fetch(`${API_BASE}/upload-report`, { // Double-check exact route in /docs
+      method: 'POST',
+      body: formData // Send FormData directly without JSON.stringify or custom Content-Type header
+    });
 
-  const handleBook = async (docName) => {
-    try {
-      const res = await fetch(`${API_BASE}/book`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          doctor_name: docName,
-          patient_name: "John Doe",
-          date: "2026-08-10",
-          time: "10:00 AM"
-        })
-      });
-      setBookingStatus(await res.json());
-    } catch (err) {
-      alert("Error connecting to backend!");
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Report upload error:", data);
+      alert(`Upload Failed (${res.status}): ${JSON.stringify(data.detail)}`);
+      return;
     }
-  };
+
+    setReportAnalysis(data);
+
+  } catch (err) {
+    console.error("Network error during upload:", err);
+    alert("Error uploading report to backend!");
+  }
+};
+
+  const handleReportUpload = async (e) => {
+  if (e) e.preventDefault();
+
+  try {
+    const formData = new FormData();
+    // 'file' must match the parameter name expected in your FastAPI endpoint (e.g., file: UploadFile)
+    formData.append('file', selectedFile); 
+
+    const res = await fetch(`${API_BASE}/upload-report`, { // Double-check exact route in /docs
+      method: 'POST',
+      body: formData // Send FormData directly without JSON.stringify or custom Content-Type header
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Report upload error:", data);
+      alert(`Upload Failed (${res.status}): ${JSON.stringify(data.detail)}`);
+      return;
+    }
+
+    setReportAnalysis(data);
+
+  } catch (err) {
+    console.error("Network error during upload:", err);
+    alert("Error uploading report to backend!");
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
