@@ -137,7 +137,7 @@ export default function App() {
       </header>
 
       <div className="flex border-b bg-white px-6 gap-4 text-sm font-medium text-slate-600">
-        {['chatbot', 'prediction', 'reports'].map(tab => (
+        {['chatbot', 'prediction', 'reports'] ?.map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -158,10 +158,10 @@ export default function App() {
             <div className="md:col-span-2 bg-white p-4 rounded-xl shadow-sm border flex flex-col h-[450px]">
               <h2 className="font-semibold mb-2">1. AI Symptom Checker</h2>
               <div className="flex-1 overflow-y-auto space-y-3 p-2 bg-slate-50 rounded-lg">
-                {chatLogs.length === 0 && (
+                {chatLogs?.length === 0 && (
                   <p className="text-xs text-slate-400 text-center mt-10">Type symptoms below (e.g., "I have chest tightness and fatigue")</p>
                 )}
-                {chatLogs.map((log, i) => (
+                {chatLogs ?.map((log, i) => (
                   <div key={i} className={`flex ${log.sender === 'patient' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`p-3 rounded-lg text-sm max-w-[80%] ${log.sender === 'patient' ? 'bg-blue-600 text-white' : 'bg-white border text-slate-700'}`}>
                       {log.text}
@@ -184,11 +184,11 @@ export default function App() {
 
             <div className="bg-white p-4 rounded-xl shadow-sm border">
               <h2 className="font-semibold mb-3">2. Recommended Specialists</h2>
-              {recommendedDocs.length === 0 ? (
+              {recommendedDocs ?.length === 0 ? (
                 <p className="text-xs text-slate-400">Run the symptom checker to get personalized doctor recommendations.</p>
               ) : (
                 <div className="space-y-3">
-                  {recommendedDocs.map(doc => (
+                  {recommendedDocs ?.map(doc => (
                     <div key={doc.id} className="p-3 border rounded-lg hover:border-blue-300">
                       <p className="font-semibold text-sm">{doc.name}</p>
                       <p className="text-xs text-slate-500">{doc.specialty} • ⭐ {doc.rating}</p>
