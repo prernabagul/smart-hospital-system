@@ -27,8 +27,8 @@ export default function App() {
   if (!chatInput) return;
   const userMsg = chatInput;
 
-  // 1. Add user message to chat UI
-  setChatLogs(prev => [...(prev || []), { sender: 'patient', text: userMsg }]);
+  // 1. Reset chatLogs so it clears previous search results
+  setChatLogs([{ sender: 'patient', text: userMsg }]);
   setChatInput('');
 
   try {
@@ -40,30 +40,29 @@ export default function App() {
 
     const data = await res.json();
 
-    // 2. Handle HTTP errors (404, 422, 500) gracefully
     if (!res.ok) {
       console.error("Chatbot API Error:", data);
       setChatLogs(prev => [
-        ...(prev || []),
+        ...prev,
         { sender: 'ai', text: `API Error (${res.status}): ${JSON.stringify(data.detail || data)}` }
       ]);
       return;
     }
 
-    // 3. Extract text response safely
     const responseText = data.triage 
       ? `[${data.triage}] ${data.reply}` 
       : (data.reply || data.message || "Analysis complete.");
 
-    setChatLogs(prev => [...(prev || []), { sender: 'ai', text: responseText }]);
+    // 2. Append AI response to the fresh single search log
+    setChatLogs(prev => [...prev, { sender: 'ai', text: responseText }]);
 
-    // 4. Safely set doctors list with an empty array [] fallback
+    // Update doctor list for the current search
     setRecommendedDocs(data.recommended_doctors || []);
 
   } catch (err) {
     console.error("Network Error:", err);
     setChatLogs(prev => [
-      ...(prev || []),
+      ...prev,
       { sender: 'ai', text: "Error connecting to backend server!" }
     ]);
   }
@@ -139,15 +138,16 @@ export default function App() {
   }
 };
  
-  const handleBook = async (e) => {
-  if (e) e.preventDefault();
+  const handleBook = async (doctorName) => {
+  // 1. Alert immediately to verify the button click is firing
+  alert(`Booking appointment with ${doctorName}...`);
 
   try {
     const bookingPayload = {
-      patient_name: bookingData?.patientName || bookingData?.patient_name || "",
-      doctor_name: bookingData?.doctorName || bookingData?.doctor_name || "",
-      date: bookingData?.date || "",
-      time: bookingData?.time || ""
+      patient_name: "Patient",
+      doctor_name: doctorName,
+      date: new Date().toISOString().split('T')[0], // "2026-08-09"
+      time: "10:00 AM"
     };
 
     const res = await fetch(`${API_BASE}/book`, {
@@ -158,18 +158,20 @@ export default function App() {
 
     const data = await res.json();
 
+    // 2. Check for backend error (e.g. 404 or 422 validation error)
     if (!res.ok) {
       console.error("Booking Error:", data);
-      alert(`Booking Failed (${res.status}): ${JSON.stringify(data.detail || data)}`);
+      alert(`Booking Error (${res.status}): ${JSON.stringify(data.detail || data)}`);
       return;
     }
 
-    alert("Appointment booked successfully!");
-    setBookingConfirmation(data);
+    // 3. Success Alert!
+    alert(`✅ Success! Appointment booked with ${doctorName}`);
+    setBookingStatus(data);
 
   } catch (err) {
     console.error("Network Error during booking:", err);
-    alert("Error connecting to booking service!");
+    alert("❌ Network Error: Could not connect to the booking service.");
   }
 };
 
@@ -223,6 +225,7 @@ export default function App() {
                   onKeyDown={e => e.key === 'Enter' && handleChat()}
                 />
                 <button onClick={handleChat} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Analyze</button>
+                <button type="button" onClick={() => { setChatLogs([]); setRecommendedDocs([]); }}>  Clear </button> 
               </div>
             </div>
 
@@ -236,7 +239,7 @@ export default function App() {
                     <div key={doc.id} className="p-3 border rounded-lg hover:border-blue-300">
                       <p className="font-semibold text-sm">{doc.name}</p>
                       <p className="text-xs text-slate-500">{doc.specialty} • ⭐ {doc.rating}</p>
-                      <button onClick={() => handleBook(doc.name)} className="mt-2 w-full bg-slate-100 hover:bg-blue-50 text-blue-600 border text-xs py-1.5 rounded font-medium">
+                      <button type="button" onClick={() => handleBook(doc.name)} className="mt-2 w-full bg-slate-100 hover:bg-blue-50 text-blue-600 border text-xs py-1.5 rounded font-medium">
                         Book Appointment
                       </button>
                     </div>
