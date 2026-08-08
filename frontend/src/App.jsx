@@ -100,35 +100,6 @@ export default function App() {
   }
 };
 
-  const handleReportUpload = async (e) => {
-  if (e) e.preventDefault();
-
-  try {
-    const formData = new FormData();
-    // 'file' must match the parameter name expected in your FastAPI endpoint (e.g., file: UploadFile)
-    formData.append('file', selectedFile); 
-
-    const res = await fetch(`${API_BASE}/upload-report`, { // Double-check exact route in /docs
-      method: 'POST',
-      body: formData // Send FormData directly without JSON.stringify or custom Content-Type header
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error("Report upload error:", data);
-      alert(`Upload Failed (${res.status}): ${JSON.stringify(data.detail)}`);
-      return;
-    }
-
-    setReportAnalysis(data);
-
-  } catch (err) {
-    console.error("Network error during upload:", err);
-    alert("Error uploading report to backend!");
-  }
-};
-
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
       <header className="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center">
