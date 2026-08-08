@@ -1,7 +1,7 @@
 // src/App.jsx
 import React, { useState } from 'react';
 
-const API_BASE = "https://smart-hospital-system-3.onrender.com/api/chatbot"; 
+const API_BASE = "https://smart-hospital-system-3.onrender.com/api"; 
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('chatbot');
@@ -15,88 +15,161 @@ export default function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [reportResult, setReportResult] = useState(null);
   const [bookingStatus, setBookingStatus] = useState(null);
+  const [bookingData, setBookingData] = useState({
+    patientName: '',
+    doctorName: '',
+    date: '',
+    time: ''
+  }); 
 
   // Handlers
   const handleChat = async () => {
-    if (!chatInput) return;
-    const userMsg = chatInput;
-    setChatLogs(prev => [...prev, { sender: 'patient', text: userMsg }]);
-    setChatInput('');
+  if (!chatInput) return;
+  const userMsg = chatInput;
 
-    try {
-      const res = await fetch(`${API_BASE}/chatbot`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg })
-      });
-      const data = await res.json();
-      setChatLogs(prev => [...prev, { sender: 'ai', text: `${data.triage} - ${data.reply}` }]);
-      setRecommendedDocs(data.recommended_doctors);
-    } catch (err) {
-      setChatLogs(prev => [...prev, { sender: 'ai', text: "Error: Ensure Python backend is running on port 8000!" }]);
-    }
-  };
+  // 1. Add user message to chat UI
+  setChatLogs(prev => [...(prev || []), { sender: 'patient', text: userMsg }]);
+  setChatInput('');
 
-  const handlePredictRisk = async () => {
   try {
-    // 1. Convert string input fields in vitals to numbers (if needed)
-    const formattedVitals = {
-      age: Number(vitals.age),
-      bmi: Number(vitals.bmi),
-      glucose: Number(vitals.glucose),
-      blood_pressure: Number(vitals.blood_pressure || vitals.bloodPressure)
+    const res = await fetch(`${API_BASE}/chatbot`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userMsg })
+    });
+
+    const data = await res.json();
+
+    // 2. Handle HTTP errors (404, 422, 500) gracefully
+    if (!res.ok) {
+      console.error("Chatbot API Error:", data);
+      setChatLogs(prev => [
+        ...(prev || []),
+        { sender: 'ai', text: `API Error (${res.status}): ${JSON.stringify(data.detail || data)}` }
+      ]);
+      return;
+    }
+
+    // 3. Extract text response safely
+    const responseText = data.triage 
+      ? `[${data.triage}] ${data.reply}` 
+      : (data.reply || data.message || "Analysis complete.");
+
+    setChatLogs(prev => [...(prev || []), { sender: 'ai', text: responseText }]);
+
+    // 4. Safely set doctors list with an empty array [] fallback
+    setRecommendedDocs(data.recommended_doctors || []);
+
+  } catch (err) {
+    console.error("Network Error:", err);
+    setChatLogs(prev => [
+      ...(prev || []),
+      { sender: 'ai', text: "Error connecting to backend server!" }
+    ]);
+  }
+};
+
+  const handlePredictRisk = async (e) => {
+  if (e) e.preventDefault();
+
+  try {
+    // Convert string inputs to Numbers expected by FastAPI/Pydantic
+    const payload = {
+      age: Number(vitals?.age || 0),
+      bmi: Number(vitals?.bmi || 0),
+      glucose: Number(vitals?.glucose || 0),
+      blood_pressure: Number(vitals?.blood_pressure || vitals?.bloodPressure || 0)
     };
 
     const res = await fetch(`${API_BASE}/predict-risk`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formattedVitals)
+      body: JSON.stringify(payload)
     });
 
     const data = await res.json();
 
-    // 2. Check if backend returned an error status (like 404 or 422)
     if (!res.ok) {
-      console.error("Backend Error Response:", data);
-      alert(`API Error (${res.status}): ${JSON.stringify(data.detail)}`);
+      console.error("Predict Risk Error:", data);
+      alert(`Risk Predictor Error (${res.status}): ${JSON.stringify(data.detail || data)}`);
       return;
     }
 
-    // 3. Success! Set the result
+    // Successfully set result state
     setRiskResult(data);
 
   } catch (err) {
-    console.error("Network Error:", err);
-    alert("Error connecting to backend!");
+    console.error("Network Error during risk prediction:", err);
+    alert("Error connecting to backend for risk calculation!");
   }
 };
 
   const handleReportUpload = async (e) => {
   if (e) e.preventDefault();
 
+  if (!selectedFile) {
+    alert("Please select a file to upload first!");
+    return;
+  }
+
   try {
     const formData = new FormData();
-    // 'file' must match the parameter name expected in your FastAPI endpoint (e.g., file: UploadFile)
-    formData.append('file', selectedFile); 
+    // 'file' matches the UploadFile parameter name in FastAPI
+    formData.append('file', selectedFile);
 
-    const res = await fetch(`${API_BASE}/upload-report`, { // Double-check exact route in /docs
+    const res = await fetch(`${API_BASE}/analyze-report`, {
       method: 'POST',
-      body: formData // Send FormData directly without JSON.stringify or custom Content-Type header
+      // Note: Do NOT set Content-Type header manually when sending FormData
+      body: formData 
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      console.error("Report upload error:", data);
-      alert(`Upload Failed (${res.status}): ${JSON.stringify(data.detail)}`);
+      console.error("Report Analysis Error:", data);
+      alert(`Report Analysis Error (${res.status}): ${JSON.stringify(data.detail || data)}`);
       return;
     }
 
     setReportAnalysis(data);
 
   } catch (err) {
-    console.error("Network error during upload:", err);
-    alert("Error uploading report to backend!");
+    console.error("Network Error during report upload:", err);
+    alert("Error connecting to backend for report analysis!");
+  }
+};
+ 
+  const handleBook = async (e) => {
+  if (e) e.preventDefault();
+
+  try {
+    const bookingPayload = {
+      patient_name: bookingData?.patientName || bookingData?.patient_name || "",
+      doctor_name: bookingData?.doctorName || bookingData?.doctor_name || "",
+      date: bookingData?.date || "",
+      time: bookingData?.time || ""
+    };
+
+    const res = await fetch(`${API_BASE}/book`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookingPayload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Booking Error:", data);
+      alert(`Booking Failed (${res.status}): ${JSON.stringify(data.detail || data)}`);
+      return;
+    }
+
+    alert("Appointment booked successfully!");
+    setBookingConfirmation(data);
+
+  } catch (err) {
+    console.error("Network Error during booking:", err);
+    alert("Error connecting to booking service!");
   }
 };
 
@@ -113,7 +186,7 @@ export default function App() {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`py-3 capitalize border-b-2 transition-all ${
-              activeTab === tab ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent'
+              activeTab === tab? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent'
             }`}
           >
             {tab === 'chatbot' && '🤖 Symptom Triage & Recommendations'}
@@ -132,7 +205,7 @@ export default function App() {
                 {chatLogs?.length === 0 && (
                   <p className="text-xs text-slate-400 text-center mt-10">Type symptoms below (e.g., "I have chest tightness and fatigue")</p>
                 )}
-                {chatLogs ?.map((log, i) => (
+                {chatLogs?.map((log, i) => (
                   <div key={i} className={`flex ${log.sender === 'patient' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`p-3 rounded-lg text-sm max-w-[80%] ${log.sender === 'patient' ? 'bg-blue-600 text-white' : 'bg-white border text-slate-700'}`}>
                       {log.text}
@@ -155,11 +228,11 @@ export default function App() {
 
             <div className="bg-white p-4 rounded-xl shadow-sm border">
               <h2 className="font-semibold mb-3">2. Recommended Specialists</h2>
-              {recommendedDocs ?.length === 0 ? (
+              {recommendedDocs?.length === 0 ? (
                 <p className="text-xs text-slate-400">Run the symptom checker to get personalized doctor recommendations.</p>
               ) : (
                 <div className="space-y-3">
-                  {recommendedDocs ?.map(doc => (
+                  {recommendedDocs?.map(doc => (
                     <div key={doc.id} className="p-3 border rounded-lg hover:border-blue-300">
                       <p className="font-semibold text-sm">{doc.name}</p>
                       <p className="text-xs text-slate-500">{doc.specialty} • ⭐ {doc.rating}</p>
