@@ -29,6 +29,7 @@ export default function App() {
 
   // 1. Reset chatLogs so it clears previous search results
   setChatLogs([{ sender: 'patient', text: userMsg }]);
+  setBookingStatus(null);
   setChatInput('');
 
   try {
@@ -225,7 +226,7 @@ export default function App() {
                   onKeyDown={e => e.key === 'Enter' && handleChat()}
                 />
                 <button onClick={handleChat} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Analyze</button>
-                <button type="button" onClick={() => { setChatLogs([]); setRecommendedDocs([]); }}>  Clear </button> 
+                <button type="button" onClick={() => { setChatLogs([]); setRecommendedDocs([]); setBookingStatus(null); }}>  Clear </button> 
               </div>
             </div>
 
