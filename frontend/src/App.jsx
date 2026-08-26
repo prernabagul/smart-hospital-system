@@ -211,22 +211,22 @@ export default function App() {
     localStorage.setItem(`smartcare_appts_${user.email}`, JSON.stringify(filtered));
   };
 
-  // 1. Colorful Login Portal
+  // 1. Fullscreen High-Contrast Login Portal
   if (!user) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)', padding: '24px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-        <div style={{ width: '100%', maxWidth: '440px', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(16px)', borderRadius: '24px', padding: '36px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', border: '1px solid rgba(255, 255, 255, 0.6)' }}>
+      <div style={{ width: '100vw', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%)', padding: '24px', boxSizing: 'border-box', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+        <div style={{ width: '100%', maxWidth: '440px', background: '#ffffff', borderRadius: '24px', padding: '36px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)', boxSizing: 'border-box' }}>
           <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-            <div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: '28px', margin: '0 auto 14px auto', boxShadow: '0 10px 15px -3px rgba(99, 102, 241, 0.3)' }}>
+            <div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #3b82f6, #6366f1)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: '28px', margin: '0 auto 14px auto', boxShadow: '0 10px 15px -3px rgba(79, 70, 229, 0.3)' }}>
               🩺
             </div>
-            <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', margin: '0 0 6px 0' }}>SmartCare AI Portal</h1>
-            <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Next-Gen Intelligent Hospital Workspace</p>
+            <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '0 0 6px 0' }}>SmartCare AI Portal</h1>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Intelligent Clinical Workspace</p>
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Full Name
               </label>
               <input
@@ -235,12 +235,12 @@ export default function App() {
                 value={authForm.name}
                 onChange={(e) => setAuthForm({ ...authForm, name: e.target.value })}
                 required
-                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none', background: '#f8fafc', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #cbd5e1', fontSize: '14px', outline: 'none', background: '#ffffff', color: '#0f172a', boxSizing: 'border-box' }}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Email Address
               </label>
               <input
@@ -249,28 +249,28 @@ export default function App() {
                 value={authForm.email}
                 onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
                 required
-                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none', background: '#f8fafc', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #cbd5e1', fontSize: '14px', outline: 'none', background: '#ffffff', color: '#0f172a', boxSizing: 'border-box' }}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Portal Role
               </label>
               <select
                 value={authForm.role}
                 onChange={(e) => setAuthForm({ ...authForm, role: e.target.value })}
-                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none', background: '#f8fafc', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #cbd5e1', fontSize: '14px', outline: 'none', background: '#ffffff', color: '#0f172a', boxSizing: 'border-box', cursor: 'pointer' }}
               >
-                <option value="Patient">Patient Workspace</option>
-                <option value="Clinician">Clinical Practitioner</option>
-                <option value="Administrator">Hospital Administrator</option>
+                <option value="Patient" style={{ color: '#0f172a' }}>Patient Workspace</option>
+                <option value="Clinician" style={{ color: '#0f172a' }}>Clinical Practitioner</option>
+                <option value="Administrator" style={{ color: '#0f172a' }}>Hospital Administrator</option>
               </select>
             </div>
 
             <button
               type="submit"
-              style={{ marginTop: '8px', padding: '14px', borderRadius: '14px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #9333ea)', color: '#ffffff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 10px 20px -5px rgba(79, 70, 229, 0.4)', transition: 'transform 0.1s ease' }}
+              style={{ marginTop: '8px', padding: '14px', borderRadius: '14px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: '#ffffff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 10px 20px -5px rgba(79, 70, 229, 0.4)' }}
             >
               Sign In to SmartCare
             </button>
@@ -280,14 +280,14 @@ export default function App() {
     );
   }
 
-  // 2. Main Dashboard (Clean, Colorful, Beautiful Spacing)
+  // 2. Fullscreen Clean Dashboard
   return (
-    <div style={{ minHeight: '100vh', background: '#f1f5f9', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      {/* Vibrant Gradient Header */}
+    <div style={{ width: '100vw', minHeight: '100vh', background: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif', boxSizing: 'border-box' }}>
+      {/* Header */}
       <header style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)', color: '#ffffff', padding: '16px 24px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '42px', height: '42px', background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', boxShadow: '0 4px 10px rgba(6, 182, 212, 0.3)' }}>
+            <div style={{ width: '42px', height: '42px', background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>
               🩺
             </div>
             <div>
@@ -316,9 +316,9 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px' }}>
-        {/* Colorful Tab Selector */}
+      {/* Main Body */}
+      <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px', boxSizing: 'border-box' }}>
+        {/* Tab Switcher */}
         <div style={{ display: 'flex', gap: '8px', background: '#e2e8f0', padding: '6px', borderRadius: '18px', maxWidth: '720px', margin: '0 auto 32px auto' }}>
           {[
             { id: 'chatbot', label: 'Symptom Triage', color: '#4f46e5', icon: '🩺' },
@@ -337,7 +337,7 @@ export default function App() {
                   borderRadius: '14px',
                   border: 'none',
                   background: isActive ? '#ffffff' : 'transparent',
-                  color: isActive ? tab.color : '#64748b',
+                  color: isActive ? tab.color : '#475569',
                   fontSize: '13px',
                   fontWeight: '700',
                   cursor: 'pointer',
@@ -359,12 +359,11 @@ export default function App() {
         {/* TAB 1: Symptom Checker & Specialist Directory */}
         {activeTab === 'chatbot' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
-            {/* Left Box: AI Symptom Checker */}
             <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981' }}></span>
-                  <h2 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#1e293b' }}>AI Symptom Checker</h2>
+                  <h2 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>AI Symptom Checker</h2>
                 </div>
                 <button
                   type="button"
@@ -373,21 +372,20 @@ export default function App() {
                     setRecommendedDocs([]);
                     setBookingStatus(null);
                   }}
-                  style={{ background: '#f1f5f9', color: '#64748b', border: 'none', padding: '6px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
+                  style={{ background: '#f1f5f9', color: '#475569', border: 'none', padding: '6px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
                 >
                   Clear
                 </button>
               </div>
 
-              {/* Chat Viewport */}
               <div style={{ flex: 1, overflowY: 'auto', margin: '16px 0', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {chatLogs.length === 0 ? (
                   <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#94a3b8' }}>
                     <div style={{ width: '48px', height: '48px', background: '#f8fafc', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', marginBottom: '10px' }}>
                       🩺
                     </div>
-                    <p style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', margin: '0 0 4px 0' }}>No symptoms evaluated yet</p>
-                    <p style={{ fontSize: '12px', maxWidth: '280px', margin: 0 }}>Type your symptoms below (e.g. chest pain, fever, migraine) to get automated guidance.</p>
+                    <p style={{ fontSize: '14px', fontWeight: '600', color: '#334155', margin: '0 0 4px 0' }}>No symptoms evaluated yet</p>
+                    <p style={{ fontSize: '12px', maxWidth: '280px', margin: 0, color: '#64748b' }}>Type your symptoms below (e.g. chest pain, fever, migraine) to get automated guidance.</p>
                   </div>
                 ) : (
                   chatLogs.map((log, i) => (
@@ -400,7 +398,7 @@ export default function App() {
                           fontSize: '13px',
                           lineHeight: '1.5',
                           background: log.sender === 'patient' ? 'linear-gradient(135deg, #4f46e5, #6366f1)' : '#f8fafc',
-                          color: log.sender === 'patient' ? '#ffffff' : '#1e293b',
+                          color: log.sender === 'patient' ? '#ffffff' : '#0f172a',
                           border: log.sender === 'patient' ? 'none' : '1px solid #e2e8f0',
                           boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
                         }}
@@ -412,14 +410,13 @@ export default function App() {
                 )}
               </div>
 
-              {/* Input Footer */}
               <form onSubmit={handleChat} style={{ display: 'flex', gap: '10px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                 <input
                   type="text"
                   placeholder="Describe your symptoms (e.g. acute headache, fever)..."
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  style={{ flex: 1, background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '14px', padding: '12px 16px', fontSize: '13px', outline: 'none', color: '#0f172a' }}
+                  style={{ flex: 1, background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '14px', padding: '12px 16px', fontSize: '13px', outline: 'none', color: '#0f172a' }}
                 />
                 <button
                   type="submit"
@@ -431,23 +428,23 @@ export default function App() {
               </form>
             </div>
 
-            {/* Right Box: Recommended Specialists */}
+            {/* Right Box: Specialists */}
             <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
               <div style={{ paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
-                <h2 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '800', color: '#1e293b' }}>Recommended Specialists</h2>
+                <h2 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>Recommended Specialists</h2>
                 <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Qualified doctors for your condition</p>
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', margin: '16px 0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {recommendedDocs.length === 0 ? (
-                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#94a3b8' }}>
+                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#64748b' }}>
                     <p style={{ fontSize: '13px', margin: 0 }}>Specialist recommendations will appear here after analysis.</p>
                   </div>
                 ) : (
                   recommendedDocs.map((doc, idx) => (
                     <div
                       key={idx}
-                      style={{ background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)', border: '1px solid #e9d5ff', borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}
+                      style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
@@ -492,23 +489,23 @@ export default function App() {
               <form onSubmit={handlePredictRisk} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Age (Years)</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Age (Years)</label>
                     <input
                       type="number"
                       value={vitals.age}
                       onChange={(e) => setVitals({ ...vitals, age: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' }}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
                       required
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>BMI Score</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>BMI Score</label>
                     <input
                       type="number"
                       step="0.1"
                       value={vitals.bmi}
                       onChange={(e) => setVitals({ ...vitals, bmi: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' }}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
                       required
                     />
                   </div>
@@ -516,22 +513,22 @@ export default function App() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Glucose (mg/dL)</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Glucose (mg/dL)</label>
                     <input
                       type="number"
                       value={vitals.glucose}
                       onChange={(e) => setVitals({ ...vitals, glucose: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' }}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
                       required
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Blood Pressure</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Blood Pressure</label>
                     <input
                       type="number"
                       value={vitals.blood_pressure}
                       onChange={(e) => setVitals({ ...vitals, blood_pressure: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' }}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
                       required
                     />
                   </div>
@@ -549,7 +546,7 @@ export default function App() {
 
             <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               {riskResult ? (
-                <div style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '1.5px solid #86efac', borderRadius: '20px', padding: '24px' }}>
+                <div style={{ background: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: '20px', padding: '24px' }}>
                   <div style={{ fontSize: '12px', fontWeight: '800', color: '#166534', textTransform: 'uppercase', marginBottom: '12px' }}>Prediction Outcome</div>
                   <div style={{ fontSize: '16px', color: '#14532d', marginBottom: '8px' }}>
                     Risk Level: <strong style={{ fontSize: '20px', color: '#15803d' }}>{riskResult.level || riskResult.risk_level || 'Moderate'}</strong>
@@ -566,8 +563,8 @@ export default function App() {
               ) : (
                 <div style={{ textAlign: 'center', color: '#94a3b8' }}>
                   <div style={{ fontSize: '40px', marginBottom: '10px' }}>📊</div>
-                  <div style={{ fontWeight: '700', color: '#64748b', marginBottom: '4px' }}>Awaiting Metrics</div>
-                  <p style={{ fontSize: '12px', margin: 0 }}>Fill in biometric parameters on the left to generate prediction.</p>
+                  <div style={{ fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Awaiting Metrics</div>
+                  <p style={{ fontSize: '12px', margin: 0, color: '#64748b' }}>Fill in biometric parameters on the left to generate prediction.</p>
                 </div>
               )}
             </div>
@@ -608,8 +605,8 @@ export default function App() {
 
             {reportResult && (
               <div style={{ marginTop: '24px', padding: '18px', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>Analysis Summary:</div>
-                <pre style={{ margin: 0, padding: '12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '11px', color: '#475569', overflowX: 'auto' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Analysis Summary:</div>
+                <pre style={{ margin: 0, padding: '12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '11px', color: '#0f172a', overflowX: 'auto' }}>
                   {JSON.stringify(reportResult, null, 2)}
                 </pre>
               </div>
@@ -634,7 +631,7 @@ export default function App() {
               <div style={{ background: '#ffffff', borderRadius: '24px', padding: '48px', textAlign: 'center', color: '#94a3b8', border: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '40px', marginBottom: '10px' }}>📅</div>
                 <h3 style={{ margin: '0 0 4px 0', color: '#334155', fontSize: '15px' }}>No Appointments Booked Yet</h3>
-                <p style={{ margin: 0, fontSize: '12px' }}>Analyze symptoms in the triage tab and book a consultation with any specialist.</p>
+                <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Analyze symptoms in the triage tab and book a consultation with any specialist.</p>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
@@ -648,7 +645,7 @@ export default function App() {
                         <span style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', fontSize: '10px', fontWeight: '800', padding: '2px 8px', borderRadius: '6px' }}>
                           {apt.id}
                         </span>
-                        <h3 style={{ margin: '8px 0 2px 0', fontSize: '15px', fontWeight: '800', color: '#1e293b' }}>{apt.doctorName}</h3>
+                        <h3 style={{ margin: '8px 0 2px 0', fontSize: '15px', fontWeight: '800', color: '#0f172a' }}>{apt.doctorName}</h3>
                         <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>{apt.specialty}</p>
                       </div>
                       <span style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '999px' }}>
@@ -658,11 +655,11 @@ export default function App() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12px' }}>
                       <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-                        <span style={{ display: 'block', color: '#94a3b8', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>Schedule</span>
-                        <span style={{ fontWeight: '700', color: '#334155' }}>{apt.date}</span>
+                        <span style={{ display: 'block', color: '#64748b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>Schedule</span>
+                        <span style={{ fontWeight: '700', color: '#0f172a' }}>{apt.date}</span>
                       </div>
                       <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-                        <span style={{ display: 'block', color: '#94a3b8', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>No-Show Risk</span>
+                        <span style={{ display: 'block', color: '#64748b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>No-Show Risk</span>
                         <span style={{ fontWeight: '800', color: '#059669' }}>{apt.noShowRisk}</span>
                       </div>
                     </div>
