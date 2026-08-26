@@ -7,7 +7,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [authForm, setAuthForm] = useState({ name: '', email: '', role: 'Patient' });
 
-  // Navigation
+  // Navigation tab
   const [activeTab, setActiveTab] = useState('chatbot');
 
   // Appointments storage
@@ -211,36 +211,36 @@ export default function App() {
     localStorage.setItem(`smartcare_appts_${user.email}`, JSON.stringify(filtered));
   };
 
-  // 1. Clean Authentication Screen
+  // 1. Colorful Login Portal
   if (!user) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 text-slate-800">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
-          <div className="text-center mb-8">
-            <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 shadow-inner">
-              ✚
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)', padding: '24px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+        <div style={{ width: '100%', maxWidth: '440px', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(16px)', borderRadius: '24px', padding: '36px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', border: '1px solid rgba(255, 255, 255, 0.6)' }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: '28px', margin: '0 auto 14px auto', boxShadow: '0 10px 15px -3px rgba(99, 102, 241, 0.3)' }}>
+              🩺
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">SmartCare Clinical</h1>
-            <p className="text-xs text-slate-500 mt-1">Enterprise Hospital AI Decision Suite</p>
+            <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', margin: '0 0 6px 0' }}>SmartCare AI Portal</h1>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Next-Gen Intelligent Hospital Workspace</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Full Name
               </label>
               <input
                 type="text"
-                placeholder="Dr. Alex Morgan"
+                placeholder="e.g. Dr. Alex Morgan"
                 value={authForm.name}
                 onChange={(e) => setAuthForm({ ...authForm, name: e.target.value })}
                 required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition-all text-slate-900 placeholder-slate-400"
+                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none', background: '#f8fafc', boxSizing: 'border-box' }}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Email Address
               </label>
               <input
@@ -249,30 +249,30 @@ export default function App() {
                 value={authForm.email}
                 onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
                 required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition-all text-slate-900 placeholder-slate-400"
+                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none', background: '#f8fafc', boxSizing: 'border-box' }}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Portal Role
               </label>
               <select
                 value={authForm.role}
                 onChange={(e) => setAuthForm({ ...authForm, role: e.target.value })}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition-all text-slate-800"
+                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none', background: '#f8fafc', boxSizing: 'border-box' }}
               >
                 <option value="Patient">Patient Workspace</option>
                 <option value="Clinician">Clinical Practitioner</option>
-                <option value="Administrator">Administrator</option>
+                <option value="Administrator">Hospital Administrator</option>
               </select>
             </div>
 
             <button
               type="submit"
-              className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-[0.99] mt-2"
+              style={{ marginTop: '8px', padding: '14px', borderRadius: '14px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #9333ea)', color: '#ffffff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 10px 20px -5px rgba(79, 70, 229, 0.4)', transition: 'transform 0.1s ease' }}
             >
-              Access Dashboard
+              Sign In to SmartCare
             </button>
           </form>
         </div>
@@ -280,32 +280,35 @@ export default function App() {
     );
   }
 
-  // 2. Main Clinical Dashboard (Spacious & Clean Layout)
+  // 2. Main Dashboard (Clean, Colorful, Beautiful Spacing)
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col antialiased">
-      {/* Top Professional Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-sm">
-              ✚
+    <div style={{ minHeight: '100vh', background: '#f1f5f9', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      {/* Vibrant Gradient Header */}
+      <header style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)', color: '#ffffff', padding: '16px 24px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '42px', height: '42px', background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', boxShadow: '0 4px 10px rgba(6, 182, 212, 0.3)' }}>
+              🩺
             </div>
             <div>
-              <span className="font-bold text-base tracking-tight text-slate-900">SmartCare AI</span>
-              <span className="ml-2.5 px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
-                Clinical Live
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '-0.02em' }}>SmartCare AI</span>
+                <span style={{ background: '#10b981', color: '#ffffff', fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '999px', textTransform: 'uppercase' }}>
+                  Live
+                </span>
+              </div>
+              <span style={{ fontSize: '12px', color: '#c7d2fe' }}>Intelligent Clinical Hub</span>
             </div>
           </div>
 
-          <div className="flex items-center space-x-5">
-            <div className="text-right hidden sm:block">
-              <div className="text-xs font-semibold text-slate-800">{user.name}</div>
-              <div className="text-[11px] text-slate-500">{user.role} &bull; {user.email}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '13px', fontWeight: '700' }}>{user.name}</div>
+              <div style={{ fontSize: '11px', color: '#a5b4fc' }}>{user.role} &bull; {user.email}</div>
             </div>
             <button
               onClick={handleLogout}
-              className="px-3.5 py-1.5 text-xs font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 border border-slate-200 hover:border-red-200 rounded-lg transition-all"
+              style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.4)', padding: '6px 14px', borderRadius: '10px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
             >
               Log Out
             </button>
@@ -313,40 +316,55 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Content Container */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
-        {/* Navigation Tabs Bar */}
-        <div className="flex p-1 mb-8 bg-slate-200/60 rounded-2xl max-w-2xl mx-auto shadow-inner">
+      {/* Main Content */}
+      <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px' }}>
+        {/* Colorful Tab Selector */}
+        <div style={{ display: 'flex', gap: '8px', background: '#e2e8f0', padding: '6px', borderRadius: '18px', maxWidth: '720px', margin: '0 auto 32px auto' }}>
           {[
-            { id: 'chatbot', label: 'Symptom Triage', icon: '🩺' },
-            { id: 'prediction', label: 'Risk Predictor', icon: '📊' },
-            { id: 'reports', label: 'Diagnostic Lab', icon: '📄' },
-            { id: 'appointments', label: `My Bookings (${appointments.length})`, icon: '📅' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                activeTab === tab.id
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
+            { id: 'chatbot', label: 'Symptom Triage', color: '#4f46e5', icon: '🩺' },
+            { id: 'prediction', label: 'Risk Predictor', color: '#0891b2', icon: '📊' },
+            { id: 'reports', label: 'Diagnostic Lab', color: '#9333ea', icon: '📄' },
+            { id: 'appointments', label: `My Bookings (${appointments.length})`, color: '#059669', icon: '📅' }
+          ].map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  flex: 1,
+                  padding: '10px 14px',
+                  borderRadius: '14px',
+                  border: 'none',
+                  background: isActive ? '#ffffff' : 'transparent',
+                  color: isActive ? tab.color : '#64748b',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  boxShadow: isActive ? '0 4px 12px rgba(0, 0, 0, 0.08)' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* TAB 1: Symptom Checker & Specialist Directory */}
         {activeTab === 'chatbot' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column: Interactive Triage Chat */}
-            <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col h-[580px]">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <div>
-                  <h2 className="font-semibold text-slate-900 text-sm">AI Symptom Classification</h2>
-                  <p className="text-xs text-slate-500">Natural language NLP diagnostic assistant</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+            {/* Left Box: AI Symptom Checker */}
+            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981' }}></span>
+                  <h2 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#1e293b' }}>AI Symptom Checker</h2>
                 </div>
                 <button
                   type="button"
@@ -355,33 +373,37 @@ export default function App() {
                     setRecommendedDocs([]);
                     setBookingStatus(null);
                   }}
-                  className="text-xs text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-all"
+                  style={{ background: '#f1f5f9', color: '#64748b', border: 'none', padding: '6px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
                 >
-                  Clear Session
+                  Clear
                 </button>
               </div>
 
               {/* Chat Viewport */}
-              <div className="flex-1 overflow-y-auto my-5 space-y-4 pr-1">
+              <div style={{ flex: 1, overflowY: 'auto', margin: '16px 0', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {chatLogs.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-8 text-slate-400">
-                    <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl mb-3 border border-slate-100">
+                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#94a3b8' }}>
+                    <div style={{ width: '48px', height: '48px', background: '#f8fafc', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', marginBottom: '10px' }}>
                       🩺
                     </div>
-                    <p className="text-sm font-medium text-slate-600">No symptoms evaluated yet</p>
-                    <p className="text-xs text-slate-400 max-w-sm mt-1">
-                      Type your current symptoms in plain words below to generate diagnostic recommendations.
-                    </p>
+                    <p style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', margin: '0 0 4px 0' }}>No symptoms evaluated yet</p>
+                    <p style={{ fontSize: '12px', maxWidth: '280px', margin: 0 }}>Type your symptoms below (e.g. chest pain, fever, migraine) to get automated guidance.</p>
                   </div>
                 ) : (
                   chatLogs.map((log, i) => (
-                    <div key={i} className={`flex ${log.sender === 'patient' ? 'justify-end' : 'justify-start'}`}>
+                    <div key={i} style={{ display: 'flex', justifyContent: log.sender === 'patient' ? 'flex-end' : 'flex-start' }}>
                       <div
-                        className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                          log.sender === 'patient'
-                            ? 'bg-indigo-600 text-white shadow-sm'
-                            : 'bg-slate-50 border border-slate-200/70 text-slate-800 shadow-sm'
-                        }`}
+                        style={{
+                          maxWidth: '85%',
+                          borderRadius: '16px',
+                          padding: '12px 16px',
+                          fontSize: '13px',
+                          lineHeight: '1.5',
+                          background: log.sender === 'patient' ? 'linear-gradient(135deg, #4f46e5, #6366f1)' : '#f8fafc',
+                          color: log.sender === 'patient' ? '#ffffff' : '#1e293b',
+                          border: log.sender === 'patient' ? 'none' : '1px solid #e2e8f0',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+                        }}
                       >
                         {log.text}
                       </div>
@@ -390,49 +412,49 @@ export default function App() {
                 )}
               </div>
 
-              {/* Input Form */}
-              <form onSubmit={handleChat} className="flex gap-2 pt-3 border-t border-slate-100">
+              {/* Input Footer */}
+              <form onSubmit={handleChat} style={{ display: 'flex', gap: '10px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                 <input
                   type="text"
-                  placeholder="Describe your symptoms (e.g., sharp headache with photophobia)..."
+                  placeholder="Describe your symptoms (e.g. acute headache, fever)..."
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 placeholder-slate-400 text-slate-900"
+                  style={{ flex: 1, background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '14px', padding: '12px 16px', fontSize: '13px', outline: 'none', color: '#0f172a' }}
                 />
                 <button
                   type="submit"
                   disabled={isAnalyzing}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-xl text-sm transition-all shadow-md shadow-indigo-600/10 disabled:opacity-50"
+                  style={{ background: 'linear-gradient(135deg, #4f46e5, #6366f1)', color: '#ffffff', border: 'none', borderRadius: '14px', padding: '0 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)' }}
                 >
                   {isAnalyzing ? 'Analyzing...' : 'Analyze'}
                 </button>
               </form>
             </div>
 
-            {/* Right Column: Specialists */}
-            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col h-[580px]">
-              <div className="pb-4 border-b border-slate-100">
-                <h2 className="font-semibold text-slate-900 text-sm">Recommended Specialists</h2>
-                <p className="text-xs text-slate-500">Ranked by symptom alignment</p>
+            {/* Right Box: Recommended Specialists */}
+            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
+              <div style={{ paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
+                <h2 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '800', color: '#1e293b' }}>Recommended Specialists</h2>
+                <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Qualified doctors for your condition</p>
               </div>
 
-              <div className="flex-1 overflow-y-auto my-4 space-y-3.5 pr-1">
+              <div style={{ flex: 1, overflowY: 'auto', margin: '16px 0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {recommendedDocs.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                    <p className="text-xs text-slate-400">Run symptom analysis to view qualified medical practitioners.</p>
+                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#94a3b8' }}>
+                    <p style={{ fontSize: '13px', margin: 0 }}>Specialist recommendations will appear here after analysis.</p>
                   </div>
                 ) : (
                   recommendedDocs.map((doc, idx) => (
                     <div
                       key={idx}
-                      className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl hover:border-indigo-200 transition-all space-y-3"
+                      style={{ background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)', border: '1px solid #e9d5ff', borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}
                     >
-                      <div className="flex items-start justify-between">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
-                          <div className="font-semibold text-sm text-slate-900">{doc.name}</div>
-                          <div className="text-xs text-slate-500 mt-0.5">{doc.specialty || 'Specialist'}</div>
+                          <div style={{ fontWeight: '800', fontSize: '14px', color: '#581c87' }}>{doc.name}</div>
+                          <div style={{ fontSize: '12px', color: '#7e22ce' }}>{doc.specialty || 'Medical Specialist'}</div>
                         </div>
-                        <span className="text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/60 px-2 py-0.5 rounded-lg">
+                        <span style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', fontSize: '11px', fontWeight: '800', padding: '3px 8px', borderRadius: '8px' }}>
                           ★ {doc.rating || '4.9'}
                         </span>
                       </div>
@@ -440,9 +462,9 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => handleBook(doc)}
-                        className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-xl shadow-sm transition-all"
+                        style={{ width: '100%', padding: '10px', background: 'linear-gradient(135deg, #7c3aed, #9333ea)', color: '#ffffff', border: 'none', borderRadius: '12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 10px rgba(147, 51, 234, 0.2)' }}
                       >
-                        Book Consultation
+                        Book Appointment
                       </button>
                     </div>
                   ))
@@ -450,70 +472,66 @@ export default function App() {
               </div>
 
               {bookingStatus && (
-                <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs space-y-1">
-                  <div className="font-semibold flex items-center gap-1.5">
-                    <span>✓</span> Consultation Confirmed
-                  </div>
+                <div style={{ padding: '14px', background: '#ecfdf5', border: '1.5px solid #a7f3d0', borderRadius: '16px', color: '#065f46', fontSize: '12px' }}>
+                  <div style={{ fontWeight: '800', marginBottom: '2px' }}>✓ Booking Confirmed!</div>
                   <div>Doctor: <strong>{bookingStatus.doctorName}</strong></div>
-                  <div className="text-slate-600">
-                    Calculated No-Show Risk: <span className="font-semibold text-slate-800">{bookingStatus.no_show_risk || "18.5%"}</span>
-                  </div>
+                  <div>No-Show Risk: <strong>{bookingStatus.no_show_risk || "18.5%"}</strong></div>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* TAB 2: Biometric Risk Predictor */}
+        {/* TAB 2: Risk Predictor */}
         {activeTab === 'prediction' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <div className="bg-white rounded-3xl border border-slate-200/80 p-8 shadow-sm">
-              <h2 className="font-bold text-slate-900 text-base mb-1">Physiological Risk Matrix</h2>
-              <p className="text-xs text-slate-500 mb-6">Enter biometric measurements for multivariate disease risk scoring.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', maxWidth: '900px', margin: '0 auto' }}>
+            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' }}>
+              <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Disease Risk Predictor</h2>
+              <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b' }}>Provide biometric metrics to calculate risk probability.</p>
 
-              <form onSubmit={handlePredictRisk} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handlePredictRisk} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Patient Age</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Age (Years)</label>
                     <input
                       type="number"
                       value={vitals.age}
                       onChange={(e) => setVitals({ ...vitals, age: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600"
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' }}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Body Mass Index (BMI)</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>BMI Score</label>
                     <input
                       type="number"
                       step="0.1"
                       value={vitals.bmi}
                       onChange={(e) => setVitals({ ...vitals, bmi: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600"
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' }}
                       required
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fasting Glucose (mg/dL)</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Glucose (mg/dL)</label>
                     <input
                       type="number"
                       value={vitals.glucose}
                       onChange={(e) => setVitals({ ...vitals, glucose: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600"
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' }}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Resting BP (mmHg)</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Blood Pressure</label>
                     <input
                       type="number"
                       value={vitals.blood_pressure}
                       onChange={(e) => setVitals({ ...vitals, blood_pressure: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600"
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' }}
                       required
                     />
                   </div>
@@ -522,80 +540,76 @@ export default function App() {
                 <button
                   type="submit"
                   disabled={isPredicting}
-                  className="w-full mt-4 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl shadow-md shadow-indigo-600/10 transition-all disabled:opacity-50"
+                  style={{ marginTop: '8px', padding: '14px', background: 'linear-gradient(135deg, #0891b2, #0284c7)', color: '#ffffff', border: 'none', borderRadius: '14px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 6px 15px rgba(8, 145, 178, 0.3)' }}
                 >
-                  {isPredicting ? 'Evaluating Risk Parameters...' : 'Calculate Risk Assessment'}
+                  {isPredicting ? 'Calculating Risk...' : 'Calculate Risk Assessment'}
                 </button>
               </form>
             </div>
 
-            <div className="bg-white rounded-3xl border border-slate-200/80 p-8 shadow-sm flex flex-col justify-center">
+            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               {riskResult ? (
-                <div className="space-y-4">
-                  <div className="text-xs uppercase tracking-wider font-bold text-slate-400">Clinical Risk Output</div>
-                  <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
-                    <div className="flex justify-between items-center pb-3 border-b border-slate-200">
-                      <span className="text-sm font-medium text-slate-600">Calculated Risk Level:</span>
-                      <span className="text-base font-bold text-slate-900">{riskResult.level || riskResult.risk_level || 'Moderate'}</span>
-                    </div>
-                    <div className="flex justify-between items-center pb-3 border-b border-slate-200">
-                      <span className="text-sm font-medium text-slate-600">Statistical Confidence:</span>
-                      <span className="text-base font-bold text-indigo-600">{riskResult.score || riskResult.confidence || '88.4%'}</span>
-                    </div>
-                    {riskResult.recommendation && (
-                      <p className="text-xs text-slate-600 leading-relaxed pt-1">
-                        {riskResult.recommendation}
-                      </p>
-                    )}
+                <div style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '1.5px solid #86efac', borderRadius: '20px', padding: '24px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: '800', color: '#166534', textTransform: 'uppercase', marginBottom: '12px' }}>Prediction Outcome</div>
+                  <div style={{ fontSize: '16px', color: '#14532d', marginBottom: '8px' }}>
+                    Risk Level: <strong style={{ fontSize: '20px', color: '#15803d' }}>{riskResult.level || riskResult.risk_level || 'Moderate'}</strong>
                   </div>
+                  <div style={{ fontSize: '14px', color: '#14532d', marginBottom: '12px' }}>
+                    Confidence Score: <strong style={{ color: '#0284c7' }}>{riskResult.score || riskResult.confidence || '88.4%'}</strong>
+                  </div>
+                  {riskResult.recommendation && (
+                    <p style={{ fontSize: '12px', color: '#166534', margin: '12px 0 0 0', paddingTop: '12px', borderTop: '1px solid #bbf7d0', lineHeight: '1.5' }}>
+                      {riskResult.recommendation}
+                    </p>
+                  )}
                 </div>
               ) : (
-                <div className="text-center text-slate-400 space-y-2 py-8">
-                  <div className="text-3xl">📊</div>
-                  <p className="text-sm font-semibold text-slate-600">Biometric Scoring Inactive</p>
-                  <p className="text-xs text-slate-400">Provide parameters on the left to produce statistical health forecasts.</p>
+                <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+                  <div style={{ fontSize: '40px', marginBottom: '10px' }}>📊</div>
+                  <div style={{ fontWeight: '700', color: '#64748b', marginBottom: '4px' }}>Awaiting Metrics</div>
+                  <p style={{ fontSize: '12px', margin: 0 }}>Fill in biometric parameters on the left to generate prediction.</p>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* TAB 3: Diagnostic Report Extraction */}
+        {/* TAB 3: Diagnostic Lab */}
         {activeTab === 'reports' && (
-          <div className="max-w-3xl mx-auto bg-white rounded-3xl border border-slate-200/80 p-8 shadow-sm">
-            <h2 className="font-bold text-slate-900 text-base mb-1">Diagnostic Report Analysis</h2>
-            <p className="text-xs text-slate-500 mb-6">Upload laboratory sheets or clinical PDF/PNG findings for automated NLP extraction.</p>
+          <div style={{ maxWidth: '640px', margin: '0 auto', background: '#ffffff', borderRadius: '24px', padding: '32px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' }}>
+            <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Diagnostic Lab Analysis</h2>
+            <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: '#64748b' }}>Upload medical lab reports (PDF, PNG, JPEG) for analysis.</p>
 
-            <form onSubmit={handleReportUpload} className="space-y-6">
-              <div className="border-2 border-dashed border-slate-200 hover:border-indigo-300 rounded-3xl p-10 text-center transition-all bg-slate-50/50">
+            <form onSubmit={handleReportUpload} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ border: '2px dashed #c084fc', background: '#faf5ff', borderRadius: '20px', padding: '36px', textAlign: 'center', cursor: 'pointer' }}>
                 <input
                   type="file"
                   id="report-file"
-                  className="hidden"
+                  style={{ display: 'none' }}
                   onChange={(e) => setSelectedFile(e.target.files[0])}
                 />
-                <label htmlFor="report-file" className="cursor-pointer space-y-2.5 block">
-                  <div className="text-3xl">📁</div>
-                  <div className="text-sm font-semibold text-slate-800">
-                    {selectedFile ? selectedFile.name : 'Select diagnostic report document'}
+                <label htmlFor="report-file" style={{ cursor: 'pointer', display: 'block' }}>
+                  <div style={{ fontSize: '40px', marginBottom: '8px' }}>📄</div>
+                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#6b21a8', marginBottom: '4px' }}>
+                    {selectedFile ? selectedFile.name : 'Choose report document'}
                   </div>
-                  <div className="text-xs text-slate-400">PDF, PNG, or JPEG formats supported</div>
+                  <div style={{ fontSize: '12px', color: '#9333ea' }}>Click to browse files</div>
                 </label>
               </div>
 
               <button
                 type="submit"
                 disabled={isUploading || !selectedFile}
-                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl text-sm shadow-md shadow-indigo-600/10 transition-all disabled:opacity-50"
+                style={{ padding: '14px', background: 'linear-gradient(135deg, #9333ea, #c026d3)', color: '#ffffff', border: 'none', borderRadius: '14px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 6px 15px rgba(147, 51, 234, 0.3)' }}
               >
-                {isUploading ? 'Extracting Medical Records...' : 'Upload & Analyze Document'}
+                {isUploading ? 'Analyzing Document...' : 'Upload & Analyze Report'}
               </button>
             </form>
 
             {reportResult && (
-              <div className="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-2">
-                <div className="font-semibold text-slate-800">Extraction Summary:</div>
-                <pre className="p-4 bg-white border border-slate-200 rounded-xl text-slate-700 overflow-x-auto text-[11px]">
+              <div style={{ marginTop: '24px', padding: '18px', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>Analysis Summary:</div>
+                <pre style={{ margin: 0, padding: '12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '11px', color: '#475569', overflowX: 'auto' }}>
                   {JSON.stringify(reportResult, null, 2)}
                 </pre>
               </div>
@@ -603,65 +617,63 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 4: Booked Consultations */}
+        {/* TAB 4: My Bookings */}
         {activeTab === 'appointments' && (
-          <div className="max-w-5xl mx-auto space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm gap-4">
+          <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <h2 className="text-base font-bold text-slate-900">Patient Consultations & History</h2>
-                <p className="text-xs text-slate-500">Live ledger of scheduled clinical appointments for {user.name}.</p>
+                <h2 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>My Scheduled Appointments</h2>
+                <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Records saved for {user.name}</p>
               </div>
-              <div className="px-4 py-2 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-xl text-xs font-semibold">
-                Total Consultations: {appointments.length}
+              <div style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', padding: '6px 16px', borderRadius: '12px', fontSize: '13px', fontWeight: '800' }}>
+                Total: {appointments.length}
               </div>
             </div>
 
             {appointments.length === 0 ? (
-              <div className="bg-white rounded-3xl border border-slate-200/80 p-12 text-center text-slate-400 shadow-sm">
-                <div className="text-4xl mb-3">📅</div>
-                <h3 className="text-slate-800 font-semibold text-sm">No Scheduled Consultations</h3>
-                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                  Run a triage assessment in the Symptom Triage tab and select a recommended specialist to add an appointment.
-                </p>
+              <div style={{ background: '#ffffff', borderRadius: '24px', padding: '48px', textAlign: 'center', color: '#94a3b8', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '40px', marginBottom: '10px' }}>📅</div>
+                <h3 style={{ margin: '0 0 4px 0', color: '#334155', fontSize: '15px' }}>No Appointments Booked Yet</h3>
+                <p style={{ margin: 0, fontSize: '12px' }}>Analyze symptoms in the triage tab and book a consultation with any specialist.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
                 {appointments.map((apt) => (
                   <div
                     key={apt.id}
-                    className="bg-white border border-slate-200/80 hover:border-slate-300 rounded-3xl p-6 shadow-sm space-y-4 transition-all"
+                    style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: '14px' }}
                   >
-                    <div className="flex justify-between items-start border-b border-slate-100 pb-3">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
                       <div>
-                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-100">
+                        <span style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', fontSize: '10px', fontWeight: '800', padding: '2px 8px', borderRadius: '6px' }}>
                           {apt.id}
                         </span>
-                        <h3 className="text-sm font-bold text-slate-900 mt-2">{apt.doctorName}</h3>
-                        <p className="text-xs text-slate-500">{apt.specialty}</p>
+                        <h3 style={{ margin: '8px 0 2px 0', fontSize: '15px', fontWeight: '800', color: '#1e293b' }}>{apt.doctorName}</h3>
+                        <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>{apt.specialty}</p>
                       </div>
-                      <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                      <span style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '999px' }}>
                         {apt.status}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                        <span className="text-slate-400 block text-[10px] font-medium uppercase">Schedule</span>
-                        <span className="text-slate-800 font-semibold">{apt.date} &bull; {apt.time}</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12px' }}>
+                      <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                        <span style={{ display: 'block', color: '#94a3b8', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>Schedule</span>
+                        <span style={{ fontWeight: '700', color: '#334155' }}>{apt.date}</span>
                       </div>
-                      <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                        <span className="text-slate-400 block text-[10px] font-medium uppercase">No-Show Risk</span>
-                        <span className="text-emerald-600 font-semibold">{apt.noShowRisk}</span>
+                      <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                        <span style={{ display: 'block', color: '#94a3b8', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>No-Show Risk</span>
+                        <span style={{ fontWeight: '800', color: '#059669' }}>{apt.noShowRisk}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-end pt-2 border-t border-slate-100">
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
                       <button
                         type="button"
                         onClick={() => handleCancelAppointment(apt.id)}
-                        className="text-xs font-semibold text-rose-500 hover:text-rose-700 hover:underline transition-all"
+                        style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                       >
-                        Cancel Consultation
+                        Cancel Appointment
                       </button>
                     </div>
                   </div>
