@@ -3,17 +3,16 @@ import React, { useState, useEffect } from 'react';
 const API_BASE = "https://smart-hospital-system-3.onrender.com/api";
 
 export default function App() {
-  // Auth state
   const [user, setUser] = useState(null);
   const [authForm, setAuthForm] = useState({ name: '', email: '', role: 'Patient' });
 
-  // Navigation tabs
+  // Navigation tab based on role
   const [activeTab, setActiveTab] = useState('chatbot');
 
   // Appointments storage
   const [appointments, setAppointments] = useState([]);
 
-  // Symptom Triage state
+  // Symptom Triage state (Patient)
   const [chatInput, setChatInput] = useState('');
   const [chatLogs, setChatLogs] = useState([]);
   const [recommendedDocs, setRecommendedDocs] = useState([]);
@@ -32,12 +31,10 @@ export default function App() {
   // Booking Feedback state
   const [bookingStatus, setBookingStatus] = useState(null);
 
-  // Synchronize appointments
+  // Synchronize appointments based on role
   useEffect(() => {
     if (user?.email) {
-      const storageKey = user.role === 'Clinician' || user.role === 'Administrator' 
-        ? 'smartcare_all_hospital_appts' 
-        : `smartcare_appts_${user.email}`;
+      const storageKey = 'smartcare_all_hospital_appts';
       const stored = localStorage.getItem(storageKey);
       if (stored) {
         try {
@@ -56,7 +53,11 @@ export default function App() {
     if (!authForm.name.trim() || !authForm.email.trim()) return;
     const loggedUser = { name: authForm.name, email: authForm.email.toLowerCase(), role: authForm.role };
     setUser(loggedUser);
-    setActiveTab(loggedUser.role === 'Patient' ? 'chatbot' : 'clinician_hub');
+    
+    // Set default active tab based on role
+    if (loggedUser.role === 'Clinician') setActiveTab('clinician_queue');
+    else if (loggedUser.role === 'Administrator') setActiveTab('admin_metrics');
+    else setActiveTab('chatbot');
   };
 
   const handleLogout = () => {
@@ -127,7 +128,6 @@ export default function App() {
         return;
       }
 
-      // Feature attribution calculation for Explainable AI (XAI)
       const glucoseImpact = payload.glucose > 125 ? 42 : payload.glucose > 100 ? 25 : 10;
       const bpImpact = payload.blood_pressure > 130 ? 35 : payload.blood_pressure > 120 ? 20 : 10;
       const bmiImpact = payload.bmi > 28 ? 23 : 10;
@@ -217,7 +217,6 @@ export default function App() {
 
       const updated = [newRecord, ...appointments];
       setAppointments(updated);
-      localStorage.setItem(`smartcare_appts_${user.email}`, JSON.stringify(updated));
       localStorage.setItem('smartcare_all_hospital_appts', JSON.stringify(updated));
       setBookingStatus({ ...data, doctorName: docName });
     } catch (err) {
@@ -229,7 +228,6 @@ export default function App() {
   const handleCancelAppointment = (id) => {
     const filtered = appointments.filter(a => a.id !== id);
     setAppointments(filtered);
-    localStorage.setItem(`smartcare_appts_${user.email}`, JSON.stringify(filtered));
     localStorage.setItem('smartcare_all_hospital_appts', JSON.stringify(filtered));
   };
 
@@ -243,7 +241,7 @@ export default function App() {
               🩺
             </div>
             <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '0 0 6px 0' }}>SmartCare AI Portal</h1>
-            <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Clinical Workspace & Analytics Suite</p>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Select your role to open custom workspace</p>
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -277,16 +275,16 @@ export default function App() {
 
             <div>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Portal Access Role
+                Portal Workspace Role
               </label>
               <select
                 value={authForm.role}
                 onChange={(e) => setAuthForm({ ...authForm, role: e.target.value })}
                 style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #cbd5e1', fontSize: '14px', outline: 'none', background: '#ffffff', color: '#0f172a', boxSizing: 'border-box', cursor: 'pointer' }}
               >
-                <option value="Patient" style={{ color: '#0f172a' }}>Patient Workspace</option>
-                <option value="Clinician" style={{ color: '#0f172a' }}>Clinical Practitioner / Doctor</option>
-                <option value="Administrator" style={{ color: '#0f172a' }}>Hospital Administrator</option>
+                <option value="Patient" style={{ color: '#0f172a' }}>Patient Workspace (Self Triage & Booking)</option>
+                <option value="Clinician" style={{ color: '#0f172a' }}>Clinical Practitioner (Patient Consultation Queue)</option>
+                <option value="Administrator" style={{ color: '#0f172a' }}>Hospital Administrator (Facility & Metrics Hub)</option>
               </select>
             </div>
 
@@ -294,7 +292,7 @@ export default function App() {
               type="submit"
               style={{ marginTop: '8px', padding: '14px', borderRadius: '14px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: '#ffffff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 10px 20px -5px rgba(79, 70, 229, 0.4)' }}
             >
-              Sign In to SmartCare
+              Launch Role Dashboard
             </button>
           </form>
         </div>
@@ -302,7 +300,7 @@ export default function App() {
     );
   }
 
-  // 2. Fullscreen Dashboard
+  // 2. Fullscreen Dashboard with Role-Specific Views
   return (
     <div style={{ width: '100vw', minHeight: '100vh', background: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif', boxSizing: 'border-box' }}>
       {/* Top Header */}
@@ -310,23 +308,23 @@ export default function App() {
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ width: '42px', height: '42px', background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>
-              🩺
+              🏥
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '-0.02em' }}>SmartCare AI</span>
-                <span style={{ background: '#10b981', color: '#ffffff', fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '999px', textTransform: 'uppercase' }}>
-                  {user.role} View
+                <span style={{ background: user.role === 'Patient' ? '#3b82f6' : user.role === 'Clinician' ? '#e11d48' : '#8b5cf6', color: '#ffffff', fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '999px', textTransform: 'uppercase' }}>
+                  {user.role} Portal
                 </span>
               </div>
-              <span style={{ fontSize: '12px', color: '#c7d2fe' }}>Clinical Decision Support System</span>
+              <span style={{ fontSize: '12px', color: '#c7d2fe' }}>Dedicated Clinical Workspace</span>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '13px', fontWeight: '700' }}>{user.name}</div>
-              <div style={{ fontSize: '11px', color: '#a5b4fc' }}>{user.role} &bull; {user.email}</div>
+              <div style={{ fontSize: '11px', color: '#a5b4fc' }}>{user.email}</div>
             </div>
             <button
               onClick={handleLogout}
@@ -340,141 +338,102 @@ export default function App() {
 
       {/* Main Container */}
       <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px', boxSizing: 'border-box' }}>
-        {/* Navigation Tabs */}
-        <div style={{ display: 'flex', gap: '8px', background: '#e2e8f0', padding: '6px', borderRadius: '18px', maxWidth: '820px', margin: '0 auto 32px auto' }}>
-          {(user.role === 'Clinician' || user.role === 'Administrator') && (
-            <button
-              onClick={() => setActiveTab('clinician_hub')}
-              style={{
-                flex: 1,
-                padding: '10px 14px',
-                borderRadius: '14px',
-                border: 'none',
-                background: activeTab === 'clinician_hub' ? '#ffffff' : 'transparent',
-                color: activeTab === 'clinician_hub' ? '#e11d48' : '#475569',
-                fontSize: '13px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                boxShadow: activeTab === 'clinician_hub' ? '0 4px 12px rgba(0, 0, 0, 0.08)' : 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px'
-              }}
-            >
-              <span>🏥</span>
-              <span>Hospital Ops</span>
-            </button>
-          )}
-
-          {[
-            { id: 'chatbot', label: 'Symptom Triage', color: '#4f46e5', icon: '🩺' },
-            { id: 'prediction', label: 'Risk & XAI Matrix', color: '#0891b2', icon: '📊' },
-            { id: 'reports', label: 'Diagnostic Lab', color: '#9333ea', icon: '📄' },
-            { id: 'appointments', label: `My Bookings (${appointments.length})`, color: '#059669', icon: '📅' }
-          ].map(tab => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  flex: 1,
-                  padding: '10px 14px',
-                  borderRadius: '14px',
-                  border: 'none',
-                  background: isActive ? '#ffffff' : 'transparent',
-                  color: isActive ? tab.color : '#475569',
-                  fontSize: '13px',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  boxShadow: isActive ? '0 4px 12px rgba(0, 0, 0, 0.08)' : 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px'
-                }}
-              >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* CLINICIAN & ADMIN HUB (FEATURE 5) */}
-        {activeTab === 'clinician_hub' && (
+        
+        {/* ================= ROLE 1: CLINICIAN WORKSPACE ================= */}
+        {user.role === 'Clinician' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {/* Top Operations Metric Row */}
+            <div style={{ display: 'flex', gap: '8px', background: '#e2e8f0', padding: '6px', borderRadius: '18px', maxWidth: '420px', margin: '0 auto 16px auto' }}>
+              <button
+                onClick={() => setActiveTab('clinician_queue')}
+                style={{ flex: 1, padding: '10px', borderRadius: '14px', border: 'none', background: activeTab === 'clinician_queue' ? '#ffffff' : 'transparent', color: activeTab === 'clinician_queue' ? '#e11d48' : '#475569', fontWeight: '700', fontSize: '13px', cursor: 'pointer' }}
+              >
+                🩺 Patient Consultation Queue ({appointments.length})
+              </button>
+            </div>
+
+            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', border: '1px solid #e2e8f0', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)' }}>
+              <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Attending Physician Consultation Desk</h2>
+              <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b' }}>Review booked patient appointments, examine triage notes, and issue clinical clearances.</p>
+
+              {appointments.length === 0 ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>📋</div>
+                  <p style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}>No patients currently assigned to your queue.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {appointments.map((apt) => (
+                    <div key={apt.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '18px', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '6px' }}>
+                          <span style={{ background: '#fee2e2', color: '#991b1b', fontSize: '10px', fontWeight: '800', padding: '2px 8px', borderRadius: '6px' }}>{apt.id}</span>
+                          <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '800', color: '#0f172a' }}>{apt.patientName || "Patient"}</h3>
+                        </div>
+                        <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#475569' }}>Assigned Specialist: <strong>{apt.doctorName}</strong> ({apt.specialty})</p>
+                        <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Scheduled: {apt.date} at {apt.time} • No-Show Risk: <strong style={{ color: '#059669' }}>{apt.noShowRisk}</strong></p>
+                      </div>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <button onClick={() => alert(`Opening clinical chart for ${apt.patientName || "Patient"}...`)} style={{ background: '#e0e7ff', color: '#3730a3', border: 'none', padding: '8px 14px', borderRadius: '10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
+                          View Chart
+                        </button>
+                        <button onClick={() => handleCancelAppointment(apt.id)} style={{ background: '#fee2e2', color: '#991b1b', border: 'none', padding: '8px 14px', borderRadius: '10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
+                          Discharge / Close
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ================= ROLE 2: ADMINISTRATOR WORKSPACE ================= */}
+        {user.role === 'Administrator' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-              <div style={{ background: '#ffffff', padding: '20px', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-                <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>ICU Bed Occupancy</span>
-                <div style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '4px 0' }}>84.2%</div>
-                <span style={{ fontSize: '11px', color: '#e11d48', fontWeight: '600' }}>● High Capacity Warning</span>
+              <div style={{ background: '#ffffff', padding: '20px', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Total Hospital Bookings</span>
+                <div style={{ fontSize: '26px', fontWeight: '800', color: '#4f46e5', margin: '4px 0' }}>{appointments.length} Records</div>
+                <span style={{ fontSize: '11px', color: '#10b981', fontWeight: '600' }}>Active System Database</span>
               </div>
-
-              <div style={{ background: '#ffffff', padding: '20px', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-                <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Active Inpatient Queue</span>
-                <div style={{ fontSize: '24px', fontWeight: '800', color: '#4f46e5', margin: '4px 0' }}>14 Patients</div>
-                <span style={{ fontSize: '11px', color: '#10b981', fontWeight: '600' }}>Avg. Wait: 8 mins</span>
+              <div style={{ background: '#ffffff', padding: '20px', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>ICU Bed Capacity</span>
+                <div style={{ fontSize: '26px', fontWeight: '800', color: '#e11d48', margin: '4px 0' }}>84.2% Full</div>
+                <span style={{ fontSize: '11px', color: '#e11d48', fontWeight: '600' }}>Critical Alert Active</span>
               </div>
-
-              <div style={{ background: '#ffffff', padding: '20px', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-                <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>On-Duty Specialists</span>
-                <div style={{ fontSize: '24px', fontWeight: '800', color: '#0891b2', margin: '4px 0' }}>8 Active</div>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>Cardio, Neuro, GenMed</span>
-              </div>
-
-              <div style={{ background: '#ffffff', padding: '20px', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-                <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Daily No-Show Rate</span>
-                <div style={{ fontSize: '24px', fontWeight: '800', color: '#059669', margin: '4px 0' }}>12.4%</div>
-                <span style={{ fontSize: '11px', color: '#059669', fontWeight: '600' }}>↓ 4.1% via SMS alerts</span>
+              <div style={{ background: '#ffffff', padding: '20px', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>System Status</span>
+                <div style={{ fontSize: '26px', fontWeight: '800', color: '#059669', margin: '4px 0' }}>Online v2.4</div>
+                <span style={{ fontSize: '11px', color: '#059669', fontWeight: '600' }}>API Connected to Render</span>
               </div>
             </div>
 
-            {/* Live Triage Queue Table */}
-            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>Live Hospital Patient Roster</h3>
-                  <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Real-time consultation queues and triage classification</p>
-                </div>
-                <span style={{ background: '#f1f5f9', padding: '4px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>
-                  Live Data Stream
-                </span>
-              </div>
-
+            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', border: '1px solid #e2e8f0', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)' }}>
+              <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Hospital Master Appointment Database</h2>
+              <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b' }}>Complete administrative oversight of all hospital schedules and analytics.</p>
+              
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid #f1f5f9', color: '#64748b', fontSize: '11px', textTransform: 'uppercase' }}>
-                    <th style={{ padding: '12px 8px' }}>Patient / ID</th>
-                    <th style={{ padding: '12px 8px' }}>Specialist Assigned</th>
-                    <th style={{ padding: '12px 8px' }}>Date / Slot</th>
+                    <th style={{ padding: '12px 8px' }}>Booking ID</th>
+                    <th style={{ padding: '12px 8px' }}>Patient Name</th>
+                    <th style={{ padding: '12px 8px' }}>Assigned Doctor</th>
+                    <th style={{ padding: '12px 8px' }}>Date</th>
                     <th style={{ padding: '12px 8px' }}>No-Show Risk</th>
-                    <th style={{ padding: '12px 8px' }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {appointments.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" style={{ textAlign: 'center', padding: '28px', color: '#94a3b8' }}>
-                        No appointments currently scheduled in hospital ledger.
-                      </td>
-                    </tr>
+                    <tr><td colSpan="5" style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>No records found in database.</td></tr>
                   ) : (
-                    appointments.map((apt) => (
+                    appointments.map(apt => (
                       <tr key={apt.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                        <td style={{ padding: '12px 8px', fontWeight: '700', color: '#0f172a' }}>
-                          {apt.patientName || "Sarah Jenkins"} <span style={{ fontSize: '11px', color: '#64748b', display: 'block', fontWeight: '400' }}>{apt.id}</span>
-                        </td>
-                        <td style={{ padding: '12px 8px', color: '#334155' }}>{apt.doctorName} ({apt.specialty})</td>
-                        <td style={{ padding: '12px 8px', color: '#64748b' }}>{apt.date} • {apt.time}</td>
+                        <td style={{ padding: '12px 8px', fontWeight: '700', color: '#4f46e5' }}>{apt.id}</td>
+                        <td style={{ padding: '12px 8px', fontWeight: '600', color: '#0f172a' }}>{apt.patientName || "Patient"}</td>
+                        <td style={{ padding: '12px 8px', color: '#334155' }}>{apt.doctorName}</td>
+                        <td style={{ padding: '12px 8px', color: '#64748b' }}>{apt.date}</td>
                         <td style={{ padding: '12px 8px', fontWeight: '700', color: '#059669' }}>{apt.noShowRisk}</td>
-                        <td style={{ padding: '12px 8px' }}>
-                          <span style={{ background: '#ecfdf5', color: '#059669', padding: '3px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: '700' }}>
-                            {apt.status}
-                          </span>
-                        </td>
                       </tr>
                     ))
                   )}
@@ -484,372 +443,395 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 1: Symptom Checker & Specialist Directory */}
-        {activeTab === 'chatbot' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
-            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981' }}></span>
-                  <h2 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>AI Symptom Checker</h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setChatLogs([]);
-                    setRecommendedDocs([]);
-                    setBookingStatus(null);
-                  }}
-                  style={{ background: '#f1f5f9', color: '#475569', border: 'none', padding: '6px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
-                >
-                  Clear
-                </button>
-              </div>
-
-              <div style={{ flex: 1, overflowY: 'auto', margin: '16px 0', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {chatLogs.length === 0 ? (
-                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#94a3b8' }}>
-                    <div style={{ width: '48px', height: '48px', background: '#f8fafc', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', marginBottom: '10px' }}>
-                      🩺
-                    </div>
-                    <p style={{ fontSize: '14px', fontWeight: '600', color: '#334155', margin: '0 0 4px 0' }}>No symptoms evaluated yet</p>
-                    <p style={{ fontSize: '12px', maxWidth: '280px', margin: 0, color: '#64748b' }}>Type your symptoms below (e.g. chest pain, fever, migraine) to get automated guidance.</p>
-                  </div>
-                ) : (
-                  chatLogs.map((log, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: log.sender === 'patient' ? 'flex-end' : 'flex-start' }}>
-                      <div
-                        style={{
-                          maxWidth: '85%',
-                          borderRadius: '16px',
-                          padding: '12px 16px',
-                          fontSize: '13px',
-                          lineHeight: '1.5',
-                          background: log.sender === 'patient' ? 'linear-gradient(135deg, #4f46e5, #6366f1)' : '#f8fafc',
-                          color: log.sender === 'patient' ? '#ffffff' : '#0f172a',
-                          border: log.sender === 'patient' ? 'none' : '1px solid #e2e8f0',
-                          boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
-                        }}
-                      >
-                        {log.text}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <form onSubmit={handleChat} style={{ display: 'flex', gap: '10px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
-                <input
-                  type="text"
-                  placeholder="Describe your symptoms (e.g. acute headache, fever)..."
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  style={{ flex: 1, background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '14px', padding: '12px 16px', fontSize: '13px', outline: 'none', color: '#0f172a' }}
-                />
-                <button
-                  type="submit"
-                  disabled={isAnalyzing}
-                  style={{ background: 'linear-gradient(135deg, #4f46e5, #6366f1)', color: '#ffffff', border: 'none', borderRadius: '14px', padding: '0 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)' }}
-                >
-                  {isAnalyzing ? 'Analyzing...' : 'Analyze'}
-                </button>
-              </form>
+        {/* ================= ROLE 3: PATIENT WORKSPACE ================= */}
+        {user.role === 'Patient' && (
+          <div>
+            {/* Patient Navigation Tabs */}
+            <div style={{ display: 'flex', gap: '8px', background: '#e2e8f0', padding: '6px', borderRadius: '18px', maxWidth: '720px', margin: '0 auto 32px auto' }}>
+              {[
+                { id: 'chatbot', label: 'Symptom Triage', color: '#4f46e5', icon: '🩺' },
+                { id: 'prediction', label: 'Risk & XAI Matrix', color: '#0891b2', icon: '📊' },
+                { id: 'reports', label: 'Diagnostic Lab', color: '#9333ea', icon: '📄' },
+                { id: 'appointments', label: `My Bookings (${appointments.length})`, color: '#059669', icon: '📅' }
+              ].map(tab => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    style={{
+                      flex: 1,
+                      padding: '10px 14px',
+                      borderRadius: '14px',
+                      border: 'none',
+                      background: isActive ? '#ffffff' : 'transparent',
+                      color: isActive ? tab.color : '#475569',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      boxShadow: isActive ? '0 4px 12px rgba(0, 0, 0, 0.08)' : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>{tab.icon}</span>
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Right Box: Specialists */}
-            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
-              <div style={{ paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
-                <h2 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>Recommended Specialists</h2>
-                <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Qualified doctors for your condition</p>
-              </div>
-
-              <div style={{ flex: 1, overflowY: 'auto', margin: '16px 0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {recommendedDocs.length === 0 ? (
-                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#64748b' }}>
-                    <p style={{ fontSize: '13px', margin: 0 }}>Specialist recommendations will appear here after analysis.</p>
-                  </div>
-                ) : (
-                  recommendedDocs.map((doc, idx) => (
-                    <div
-                      key={idx}
-                      style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}
+            {/* TAB 1: Symptom Checker & Specialist Directory */}
+            {activeTab === 'chatbot' && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+                <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981' }}></span>
+                      <h2 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>AI Symptom Checker</h2>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setChatLogs([]);
+                        setRecommendedDocs([]);
+                        setBookingStatus(null);
+                      }}
+                      style={{ background: '#f1f5f9', color: '#475569', border: 'none', padding: '6px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div>
-                          <div style={{ fontWeight: '800', fontSize: '14px', color: '#581c87' }}>{doc.name}</div>
-                          <div style={{ fontSize: '12px', color: '#7e22ce' }}>{doc.specialty || 'Medical Specialist'}</div>
+                      Clear
+                    </button>
+                  </div>
+
+                  <div style={{ flex: 1, overflowY: 'auto', margin: '16px 0', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {chatLogs.length === 0 ? (
+                      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#94a3b8' }}>
+                        <div style={{ width: '48px', height: '48px', background: '#f8fafc', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', marginBottom: '10px' }}>
+                          🩺
                         </div>
-                        <span style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', fontSize: '11px', fontWeight: '800', padding: '3px 8px', borderRadius: '8px' }}>
-                          ★ {doc.rating || '4.9'}
-                        </span>
+                        <p style={{ fontSize: '14px', fontWeight: '600', color: '#334155', margin: '0 0 4px 0' }}>No symptoms evaluated yet</p>
+                        <p style={{ fontSize: '12px', maxWidth: '280px', margin: 0, color: '#64748b' }}>Type your symptoms below (e.g. chest pain, fever, migraine) to get automated guidance.</p>
                       </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleBook(doc)}
-                        style={{ width: '100%', padding: '10px', background: 'linear-gradient(135deg, #7c3aed, #9333ea)', color: '#ffffff', border: 'none', borderRadius: '12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 10px rgba(147, 51, 234, 0.2)' }}
-                      >
-                        Book Appointment
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {bookingStatus && (
-                <div style={{ padding: '14px', background: '#ecfdf5', border: '1.5px solid #a7f3d0', borderRadius: '16px', color: '#065f46', fontSize: '12px' }}>
-                  <div style={{ fontWeight: '800', marginBottom: '2px' }}>✓ Booking Confirmed!</div>
-                  <div>Doctor: <strong>{bookingStatus.doctorName}</strong></div>
-                  <div>No-Show Risk: <strong>{bookingStatus.no_show_risk || "18.5%"}</strong></div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: Risk Predictor with EXPLAINABLE AI (XAI) (FEATURE 6) */}
-        {activeTab === 'prediction' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', maxWidth: '960px', margin: '0 auto' }}>
-            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' }}>
-              <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Disease Risk Predictor</h2>
-              <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b' }}>Provide biometric metrics to calculate risk probability.</p>
-
-              <form onSubmit={handlePredictRisk} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Age (Years)</label>
-                    <input
-                      type="number"
-                      value={vitals.age}
-                      onChange={(e) => setVitals({ ...vitals, age: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
-                      required
-                    />
+                    ) : (
+                      chatLogs.map((log, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: log.sender === 'patient' ? 'flex-end' : 'flex-start' }}>
+                          <div
+                            style={{
+                              maxWidth: '85%',
+                              borderRadius: '16px',
+                              padding: '12px 16px',
+                              fontSize: '13px',
+                              lineHeight: '1.5',
+                              background: log.sender === 'patient' ? 'linear-gradient(135deg, #4f46e5, #6366f1)' : '#f8fafc',
+                              color: log.sender === 'patient' ? '#ffffff' : '#0f172a',
+                              border: log.sender === 'patient' ? 'none' : '1px solid #e2e8f0',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+                            }}
+                          >
+                            {log.text}
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>BMI Score</label>
+
+                  <form onSubmit={handleChat} style={{ display: 'flex', gap: '10px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                     <input
-                      type="number"
-                      step="0.1"
-                      value={vitals.bmi}
-                      onChange={(e) => setVitals({ ...vitals, bmi: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
-                      required
+                      type="text"
+                      placeholder="Describe your symptoms (e.g. acute headache, fever)..."
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      style={{ flex: 1, background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '14px', padding: '12px 16px', fontSize: '13px', outline: 'none', color: '#0f172a' }}
                     />
-                  </div>
+                    <button
+                      type="submit"
+                      disabled={isAnalyzing}
+                      style={{ background: 'linear-gradient(135deg, #4f46e5, #6366f1)', color: '#ffffff', border: 'none', borderRadius: '14px', padding: '0 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)' }}
+                    >
+                      {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+                    </button>
+                  </form>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Glucose (mg/dL)</label>
-                    <input
-                      type="number"
-                      value={vitals.glucose}
-                      onChange={(e) => setVitals({ ...vitals, glucose: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Blood Pressure</label>
-                    <input
-                      type="number"
-                      value={vitals.blood_pressure}
-                      onChange={(e) => setVitals({ ...vitals, blood_pressure: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isPredicting}
-                  style={{ marginTop: '8px', padding: '14px', background: 'linear-gradient(135deg, #0891b2, #0284c7)', color: '#ffffff', border: 'none', borderRadius: '14px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 6px 15px rgba(8, 145, 178, 0.3)' }}
-                >
-                  {isPredicting ? 'Calculating Risk & Attribution...' : 'Calculate Risk Assessment'}
-                </button>
-              </form>
-            </div>
-
-            {/* Explainable AI (XAI) Feature Attribution Card */}
-            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              {riskResult ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {/* Risk Badge */}
-                  <div style={{ background: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: '18px', padding: '18px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: '800', color: '#166534', textTransform: 'uppercase', marginBottom: '6px' }}>Model Prediction</div>
-                    <div style={{ fontSize: '18px', fontWeight: '800', color: '#15803d' }}>
-                      {riskResult.level || riskResult.risk_level || 'Moderate Risk'}{' '}
-                      <span style={{ fontSize: '13px', color: '#0284c7', fontWeight: '700', marginLeft: '6px' }}>
-                        ({riskResult.score || riskResult.confidence || '88.4%'} Confidence)
-                      </span>
-                    </div>
+                {/* Right Box: Specialists */}
+                <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
+                  <div style={{ paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
+                    <h2 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>Recommended Specialists</h2>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Qualified doctors for your condition</p>
                   </div>
 
-                  {/* Explainable AI Transparency Block */}
-                  {riskResult.xai && (
-                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '18px', padding: '18px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a' }}>🧠 Explainable AI (XAI) Attribution</span>
-                        <span style={{ fontSize: '10px', background: '#eff6ff', color: '#2563eb', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
-                          SHAP Matrix
-                        </span>
+                  <div style={{ flex: 1, overflowY: 'auto', margin: '16px 0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {recommendedDocs.length === 0 ? (
+                      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#64748b' }}>
+                        <p style={{ fontSize: '13px', margin: 0 }}>Specialist recommendations will appear here after analysis.</p>
                       </div>
-                      
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '11px' }}>
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px', color: '#334155' }}>
-                            <span>Fasting Glucose Contribution</span>
-                            <strong>{riskResult.xai.glucoseImpact}%</strong>
+                    ) : (
+                      recommendedDocs.map((doc, idx) => (
+                        <div
+                          key={idx}
+                          style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div>
+                              <div style={{ fontWeight: '800', fontSize: '14px', color: '#581c87' }}>{doc.name}</div>
+                              <div style={{ fontSize: '12px', color: '#7e22ce' }}>{doc.specialty || 'Medical Specialist'}</div>
+                            </div>
+                            <span style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', fontSize: '11px', fontWeight: '800', padding: '3px 8px', borderRadius: '8px' }}>
+                              ★ {doc.rating || '4.9'}
+                            </span>
                           </div>
-                          <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
-                            <div style={{ width: `${riskResult.xai.glucoseImpact}%`, height: '100%', background: '#ef4444' }}></div>
-                          </div>
-                        </div>
 
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px', color: '#334155' }}>
-                            <span>Blood Pressure Weight</span>
-                            <strong>{riskResult.xai.bpImpact}%</strong>
-                          </div>
-                          <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
-                            <div style={{ width: `${riskResult.xai.bpImpact}%`, height: '100%', background: '#f59e0b' }}></div>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleBook(doc)}
+                            style={{ width: '100%', padding: '10px', background: 'linear-gradient(135deg, #7c3aed, #9333ea)', color: '#ffffff', border: 'none', borderRadius: '12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 10px rgba(147, 51, 234, 0.2)' }}
+                          >
+                            Book Appointment
+                          </button>
                         </div>
+                      ))
+                    )}
+                  </div>
 
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px', color: '#334155' }}>
-                            <span>BMI & Body Composition</span>
-                            <strong>{riskResult.xai.bmiImpact}%</strong>
-                          </div>
-                          <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
-                            <div style={{ width: `${riskResult.xai.bmiImpact}%`, height: '100%', background: '#3b82f6' }}></div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #e2e8f0', fontSize: '11px', color: '#64748b' }}>
-                        Primary risk driver identified as <strong style={{ color: '#0f172a' }}>{riskResult.xai.primaryDriver}</strong>.
-                      </div>
+                  {bookingStatus && (
+                    <div style={{ padding: '14px', background: '#ecfdf5', border: '1.5px solid #a7f3d0', borderRadius: '16px', color: '#065f46', fontSize: '12px' }}>
+                      <div style={{ fontWeight: '800', marginBottom: '2px' }}>✓ Booking Confirmed!</div>
+                      <div>Doctor: <strong>{bookingStatus.doctorName}</strong></div>
+                      <div>No-Show Risk: <strong>{bookingStatus.no_show_risk || "18.5%"}</strong></div>
                     </div>
                   )}
                 </div>
-              ) : (
-                <div style={{ textAlign: 'center', color: '#94a3b8' }}>
-                  <div style={{ fontSize: '40px', marginBottom: '10px' }}>📊</div>
-                  <div style={{ fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Awaiting Metrics</div>
-                  <p style={{ fontSize: '12px', margin: 0, color: '#64748b' }}>Input parameters to generate risk scores with Explainable AI attribution.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: Diagnostic Lab */}
-        {activeTab === 'reports' && (
-          <div style={{ maxWidth: '640px', margin: '0 auto', background: '#ffffff', borderRadius: '24px', padding: '32px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' }}>
-            <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Diagnostic Lab Analysis</h2>
-            <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: '#64748b' }}>Upload medical lab reports (PDF, PNG, JPEG) for analysis.</p>
-
-            <form onSubmit={handleReportUpload} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ border: '2px dashed #c084fc', background: '#faf5ff', borderRadius: '20px', padding: '36px', textAlign: 'center', cursor: 'pointer' }}>
-                <input
-                  type="file"
-                  id="report-file"
-                  style={{ display: 'none' }}
-                  onChange={(e) => setSelectedFile(e.target.files[0])}
-                />
-                <label htmlFor="report-file" style={{ cursor: 'pointer', display: 'block' }}>
-                  <div style={{ fontSize: '40px', marginBottom: '8px' }}>📄</div>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#6b21a8', marginBottom: '4px' }}>
-                    {selectedFile ? selectedFile.name : 'Choose report document'}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#9333ea' }}>Click to browse files</div>
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isUploading || !selectedFile}
-                style={{ padding: '14px', background: 'linear-gradient(135deg, #9333ea, #c026d3)', color: '#ffffff', border: 'none', borderRadius: '14px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 6px 15px rgba(147, 51, 234, 0.3)' }}
-              >
-                {isUploading ? 'Analyzing Document...' : 'Upload & Analyze Report'}
-              </button>
-            </form>
-
-            {reportResult && (
-              <div style={{ marginTop: '24px', padding: '18px', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Analysis Summary:</div>
-                <pre style={{ margin: 0, padding: '12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '11px', color: '#0f172a', overflowX: 'auto' }}>
-                  {JSON.stringify(reportResult, null, 2)}
-                </pre>
               </div>
             )}
-          </div>
-        )}
 
-        {/* TAB 4: My Bookings */}
-        {activeTab === 'appointments' && (
-          <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <h2 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>My Scheduled Appointments</h2>
-                <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Records saved for {user.name}</p>
-              </div>
-              <div style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', padding: '6px 16px', borderRadius: '12px', fontSize: '13px', fontWeight: '800' }}>
-                Total: {appointments.length}
-              </div>
-            </div>
+            {/* TAB 2: Risk Predictor with XAI */}
+            {activeTab === 'prediction' && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', maxWidth: '960px', margin: '0 auto' }}>
+                <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' }}>
+                  <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Disease Risk Predictor</h2>
+                  <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b' }}>Provide biometric metrics to calculate risk probability.</p>
 
-            {appointments.length === 0 ? (
-              <div style={{ background: '#ffffff', borderRadius: '24px', padding: '48px', textAlign: 'center', color: '#94a3b8', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '40px', marginBottom: '10px' }}>📅</div>
-                <h3 style={{ margin: '0 0 4px 0', color: '#334155', fontSize: '15px' }}>No Appointments Booked Yet</h3>
-                <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Analyze symptoms in the triage tab and book a consultation with any specialist.</p>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
-                {appointments.map((apt) => (
-                  <div
-                    key={apt.id}
-                    style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: '14px' }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                  <form onSubmit={handlePredictRisk} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                       <div>
-                        <span style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', fontSize: '10px', fontWeight: '800', padding: '2px 8px', borderRadius: '6px' }}>
-                          {apt.id}
-                        </span>
-                        <h3 style={{ margin: '8px 0 2px 0', fontSize: '15px', fontWeight: '800', color: '#0f172a' }}>{apt.doctorName}</h3>
-                        <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>{apt.specialty}</p>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Age (Years)</label>
+                        <input
+                          type="number"
+                          value={vitals.age}
+                          onChange={(e) => setVitals({ ...vitals, age: e.target.value })}
+                          style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
+                          required
+                        />
                       </div>
-                      <span style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '999px' }}>
-                        {apt.status}
-                      </span>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>BMI Score</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={vitals.bmi}
+                          onChange={(e) => setVitals({ ...vitals, bmi: e.target.value })}
+                          style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
+                          required
+                        />
+                      </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12px' }}>
-                      <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-                        <span style={{ display: 'block', color: '#64748b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>Schedule</span>
-                        <span style={{ fontWeight: '700', color: '#0f172a' }}>{apt.date}</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Glucose (mg/dL)</label>
+                        <input
+                          type="number"
+                          value={vitals.glucose}
+                          onChange={(e) => setVitals({ ...vitals, glucose: e.target.value })}
+                          style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
+                          required
+                        />
                       </div>
-                      <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-                        <span style={{ display: 'block', color: '#64748b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>No-Show Risk</span>
-                        <span style={{ fontWeight: '800', color: '#059669' }}>{apt.noShowRisk}</span>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Blood Pressure</label>
+                        <input
+                          type="number"
+                          value={vitals.blood_pressure}
+                          onChange={(e) => setVitals({ ...vitals, blood_pressure: e.target.value })}
+                          style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
+                          required
+                        />
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
-                      <button
-                        type="button"
-                        onClick={() => handleCancelAppointment(apt.id)}
-                        style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
-                      >
-                        Cancel Appointment
-                      </button>
+                    <button
+                      type="submit"
+                      disabled={isPredicting}
+                      style={{ marginTop: '8px', padding: '14px', background: 'linear-gradient(135deg, #0891b2, #0284c7)', color: '#ffffff', border: 'none', borderRadius: '14px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 6px 15px rgba(8, 145, 178, 0.3)' }}
+                    >
+                      {isPredicting ? 'Calculating Risk & Attribution...' : 'Calculate Risk Assessment'}
+                    </button>
+                  </form>
+                </div>
+
+                <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  {riskResult ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div style={{ background: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: '18px', padding: '18px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '800', color: '#166534', textTransform: 'uppercase', marginBottom: '6px' }}>Model Prediction</div>
+                        <div style={{ fontSize: '18px', fontWeight: '800', color: '#15803d' }}>
+                          {riskResult.level || riskResult.risk_level || 'Moderate Risk'}{' '}
+                          <span style={{ fontSize: '13px', color: '#0284c7', fontWeight: '700', marginLeft: '6px' }}>
+                            ({riskResult.score || riskResult.confidence || '88.4%'} Confidence)
+                          </span>
+                        </div>
+                      </div>
+
+                      {riskResult.xai && (
+                        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '18px', padding: '18px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <span style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a' }}>🧠 Explainable AI (XAI) Attribution</span>
+                            <span style={{ fontSize: '10px', background: '#eff6ff', color: '#2563eb', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
+                              SHAP Matrix
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '11px' }}>
+                            <div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px', color: '#334155' }}>
+                                <span>Fasting Glucose Contribution</span>
+                                <strong>{riskResult.xai.glucoseImpact}%</strong>
+                              </div>
+                              <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                                <div style={{ width: `${riskResult.xai.glucoseImpact}%`, height: '100%', background: '#ef4444' }}></div>
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px', color: '#334155' }}>
+                                <span>Blood Pressure Weight</span>
+                                <strong>{riskResult.xai.bpImpact}%</strong>
+                              </div>
+                              <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                                <div style={{ width: `${riskResult.xai.bpImpact}%`, height: '100%', background: '#f59e0b' }}></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+                      <div style={{ fontSize: '40px', marginBottom: '10px' }}>📊</div>
+                      <div style={{ fontWeight: '700', color: '#334155', marginBottom: '4px' }}>Awaiting Metrics</div>
+                      <p style={{ fontSize: '12px', margin: 0, color: '#64748b' }}>Input parameters to generate risk scores with Explainable AI attribution.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: Diagnostic Lab */}
+            {activeTab === 'reports' && (
+              <div style={{ maxWidth: '640px', margin: '0 auto', background: '#ffffff', borderRadius: '24px', padding: '32px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0' }}>
+                <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Diagnostic Lab Analysis</h2>
+                <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: '#64748b' }}>Upload medical lab reports (PDF, PNG, JPEG) for analysis.</p>
+
+                <form onSubmit={handleReportUpload} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div style={{ border: '2px dashed #c084fc', background: '#faf5ff', borderRadius: '20px', padding: '36px', textAlign: 'center', cursor: 'pointer' }}>
+                    <input
+                      type="file"
+                      id="report-file"
+                      style={{ display: 'none' }}
+                      onChange={(e) => setSelectedFile(e.target.files[0])}
+                    />
+                    <label htmlFor="report-file" style={{ cursor: 'pointer', display: 'block' }}>
+                      <div style={{ fontSize: '40px', marginBottom: '8px' }}>📄</div>
+                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#6b21a8', marginBottom: '4px' }}>
+                        {selectedFile ? selectedFile.name : 'Choose report document'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#9333ea' }}>Click to browse files</div>
+                    </label>
                   </div>
-                ))}
+
+                  <button
+                    type="submit"
+                    disabled={isUploading || !selectedFile}
+                    style={{ padding: '14px', background: 'linear-gradient(135deg, #9333ea, #c026d3)', color: '#ffffff', border: 'none', borderRadius: '14px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 6px 15px rgba(147, 51, 234, 0.3)' }}
+                  >
+                    {isUploading ? 'Analyzing Document...' : 'Upload & Analyze Report'}
+                  </button>
+                </form>
+
+                {reportResult && (
+                  <div style={{ marginTop: '24px', padding: '18px', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Analysis Summary:</div>
+                    <pre style={{ margin: 0, padding: '12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '11px', color: '#0f172a', overflowX: 'auto' }}>
+                      {JSON.stringify(reportResult, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 4: My Bookings */}
+            {activeTab === 'appointments' && (
+              <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <h2 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>My Scheduled Appointments</h2>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Records saved for {user.name}</p>
+                  </div>
+                  <div style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', padding: '6px 16px', borderRadius: '12px', fontSize: '13px', fontWeight: '800' }}>
+                    Total: {appointments.length}
+                  </div>
+                </div>
+
+                {appointments.length === 0 ? (
+                  <div style={{ background: '#ffffff', borderRadius: '24px', padding: '48px', textAlign: 'center', color: '#94a3b8', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '40px', marginBottom: '10px' }}>📅</div>
+                    <h3 style={{ margin: '0 0 4px 0', color: '#334155', fontSize: '15px' }}>No Appointments Booked Yet</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Analyze symptoms in the triage tab and book a consultation with any specialist.</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+                    {appointments.map((apt) => (
+                      <div
+                        key={apt.id}
+                        style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: '14px' }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                          <div>
+                            <span style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', fontSize: '10px', fontWeight: '800', padding: '2px 8px', borderRadius: '6px' }}>
+                              {apt.id}
+                            </span>
+                            <h3 style={{ margin: '8px 0 2px 0', fontSize: '15px', fontWeight: '800', color: '#0f172a' }}>{apt.doctorName}</h3>
+                            <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>{apt.specialty}</p>
+                          </div>
+                          <span style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '999px' }}>
+                            {apt.status}
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12px' }}>
+                          <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                            <span style={{ display: 'block', color: '#64748b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>Schedule</span>
+                            <span style={{ fontWeight: '700', color: '#0f172a' }}>{apt.date}</span>
+                          </div>
+                          <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                            <span style={{ display: 'block', color: '#64748b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>No-Show Risk</span>
+                            <span style={{ fontWeight: '800', color: '#059669' }}>{apt.noShowRisk}</span>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleCancelAppointment(apt.id)}
+                            style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                          >
+                            Cancel Appointment
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -858,3 +840,4 @@ export default function App() {
     </div>
   );
 }
+
