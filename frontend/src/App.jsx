@@ -2,9 +2,21 @@ import React, { useState, useEffect } from 'react';
 
 const API_BASE = "https://smart-hospital-system-3.onrender.com/api";
 
+// Staff Authorization Access Codes
+const SECURITY_KEYS = {
+  Clinician: "DOC2026",
+  Administrator: "ADMIN777"
+};
+
 export default function App() {
   const [user, setUser] = useState(null);
-  const [authForm, setAuthForm] = useState({ name: '', email: '', role: 'Patient' });
+  const [authForm, setAuthForm] = useState({
+    name: '',
+    email: '',
+    role: 'Patient',
+    passkey: ''
+  });
+  const [authError, setAuthError] = useState('');
 
   // Navigation tab
   const [activeTab, setActiveTab] = useState('chatbot');
@@ -57,10 +69,37 @@ export default function App() {
     }
   }, []);
 
+  // Secure Authentication Handler
   const handleLogin = (e) => {
     e.preventDefault();
-    if (!authForm.name.trim() || !authForm.email.trim()) return;
-    const loggedUser = { name: authForm.name, email: authForm.email.toLowerCase(), role: authForm.role };
+    setAuthError('');
+
+    if (!authForm.name.trim() || !authForm.email.trim()) {
+      setAuthError("Please fill in your name and email.");
+      return;
+    }
+
+    // Role-Based Access Control Verification
+    if (authForm.role === 'Clinician') {
+      if (authForm.passkey.trim() !== SECURITY_KEYS.Clinician) {
+        setAuthError("⛔ Access Denied: Invalid Medical License / Staff PIN.");
+        return;
+      }
+    }
+
+    if (authForm.role === 'Administrator') {
+      if (authForm.passkey.trim() !== SECURITY_KEYS.Administrator) {
+        setAuthError("⛔ Access Denied: Invalid Master Administrator Security Key.");
+        return;
+      }
+    }
+
+    const loggedUser = {
+      name: authForm.name,
+      email: authForm.email.toLowerCase(),
+      role: authForm.role
+    };
+
     setUser(loggedUser);
     
     if (loggedUser.role === 'Clinician') setActiveTab('doctor_desk');
@@ -70,6 +109,8 @@ export default function App() {
 
   const handleLogout = () => {
     setUser(null);
+    setAuthForm({ name: '', email: '', role: 'Patient', passkey: '' });
+    setAuthError('');
     setChatLogs([]);
     setRecommendedDocs([]);
     setRiskResult(null);
@@ -77,7 +118,7 @@ export default function App() {
     setBookingStatus(null);
   };
 
-  // Open booking modal when patient clicks doctor card
+  // Open booking modal when patient selects a doctor
   const handleOpenBookingModal = (doctor) => {
     setBookingModalDoc(doctor);
     setCustomBookingForm({
@@ -87,7 +128,7 @@ export default function App() {
     });
   };
 
-  // Confirm and submit custom patient appointment
+  // Confirm custom patient appointment
   const handleConfirmBooking = async (e) => {
     if (e) e.preventDefault();
     if (!bookingModalDoc) return;
@@ -134,7 +175,7 @@ export default function App() {
       localStorage.setItem('smartcare_all_hospital_appts', JSON.stringify(updated));
       setBookingStatus({ ...data, doctorName: docName });
       setBookingModalDoc(null);
-      alert(`Appointment requested for ${customBookingForm.date} at ${customBookingForm.time} with ${docName}!`);
+      alert(`✅ Consultation requested for ${customBookingForm.date} at ${customBookingForm.time} with ${docName}!`);
     } catch (err) {
       console.error(err);
       alert("Booking service unavailable.");
@@ -147,7 +188,7 @@ export default function App() {
 
     if (selectedBedType === 'ICU') {
       if (beds.occupiedIcu >= beds.totalIcu) {
-        alert("ICU is at 100% capacity! Cannot allocate ICU bed.");
+        alert("⚠️ ICU is at 100% capacity! Cannot allocate ICU bed.");
         return;
       }
       const updatedBeds = { ...beds, occupiedIcu: beds.occupiedIcu + 1 };
@@ -155,7 +196,7 @@ export default function App() {
       localStorage.setItem('smartcare_hospital_beds', JSON.stringify(updatedBeds));
     } else {
       if (beds.occupiedGeneral >= beds.totalGeneral) {
-        alert("General Ward is full!");
+        alert("⚠️ General Ward is full!");
         return;
       }
       const updatedBeds = { ...beds, occupiedGeneral: beds.occupiedGeneral + 1 };
@@ -172,7 +213,7 @@ export default function App() {
 
     setAppointments(updatedList);
     localStorage.setItem('smartcare_all_hospital_appts', JSON.stringify(updatedList));
-    alert(`${selectedBedType} Bed assigned successfully to ${bedModalPatient.patientName || "Patient"}!`);
+    alert(`✅ ${selectedBedType} Bed assigned successfully to ${bedModalPatient.patientName || "Patient"}!`);
     setBedModalPatient(null);
   };
 
@@ -295,18 +336,26 @@ export default function App() {
     localStorage.setItem('smartcare_all_hospital_appts', JSON.stringify(filtered));
   };
 
-  // 1. Auth View
+  // 1. Authenticated Portal with Role-Based Passkey Security
   if (!user) {
+    const isStaff = authForm.role === 'Clinician' || authForm.role === 'Administrator';
+
     return (
       <div style={{ width: '100vw', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%)', padding: '24px', boxSizing: 'border-box', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
         <div style={{ width: '100%', maxWidth: '440px', background: '#ffffff', borderRadius: '24px', padding: '36px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)', boxSizing: 'border-box' }}>
-          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
             <div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #3b82f6, #6366f1)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: '28px', margin: '0 auto 14px auto', boxShadow: '0 10px 15px -3px rgba(79, 70, 229, 0.3)' }}>
               🩺
             </div>
             <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '0 0 6px 0' }}>SmartCare AI Portal</h1>
-            <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Select your role to access custom portal</p>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Role-Based Clinical Access Gate</p>
           </div>
+
+          {authError && (
+            <div style={{ padding: '10px 14px', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '12px', color: '#991b1b', fontSize: '12px', fontWeight: '700', marginBottom: '16px' }}>
+              {authError}
+            </div>
+          )}
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
@@ -334,23 +383,48 @@ export default function App() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px', textTransform: 'uppercase' }}>Select Role</label>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px', textTransform: 'uppercase' }}>Select Access Role</label>
               <select
                 value={authForm.role}
-                onChange={(e) => setAuthForm({ ...authForm, role: e.target.value })}
+                onChange={(e) => {
+                  setAuthForm({ ...authForm, role: e.target.value, passkey: '' });
+                  setAuthError('');
+                }}
                 style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #cbd5e1', fontSize: '14px', outline: 'none', background: '#ffffff', color: '#0f172a', boxSizing: 'border-box', cursor: 'pointer' }}
               >
-                <option value="Patient">Patient (Self-Triage & Custom Booking)</option>
-                <option value="Clinician">Clinical Practitioner / Doctor</option>
-                <option value="Administrator">Hospital Administrator</option>
+                <option value="Patient">Patient (Self-Triage & Booking)</option>
+                <option value="Clinician">Clinical Practitioner / Doctor 🔒</option>
+                <option value="Administrator">Hospital Administrator 🔒</option>
               </select>
             </div>
+
+            {/* GATED PASSCODE ENTRY (APPEARS ONLY FOR DOCTOR & ADMIN) */}
+            {isStaff && (
+              <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '14px', border: '1.5px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: '800', color: '#dc2626', textTransform: 'uppercase' }}>
+                    🔒 {authForm.role === 'Clinician' ? 'Medical Staff License PIN' : 'Master Security Key'}
+                  </label>
+                  <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>
+                    Key: <strong style={{ color: '#0f172a' }}>{SECURITY_KEYS[authForm.role]}</strong>
+                  </span>
+                </div>
+                <input
+                  type="password"
+                  placeholder={authForm.role === 'Clinician' ? "Enter DOC2026" : "Enter ADMIN777"}
+                  value={authForm.passkey}
+                  onChange={(e) => setAuthForm({ ...authForm, passkey: e.target.value })}
+                  required
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid #f87171', fontSize: '13px', outline: 'none', background: '#ffffff', color: '#0f172a', boxSizing: 'border-box' }}
+                />
+              </div>
+            )}
 
             <button
               type="submit"
               style={{ marginTop: '8px', padding: '14px', borderRadius: '14px', border: 'none', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: '#ffffff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 10px 20px -5px rgba(79, 70, 229, 0.4)' }}
             >
-              Access Portal
+              Authenticate & Launch
             </button>
           </form>
         </div>
@@ -689,7 +763,7 @@ export default function App() {
                   </form>
                 </div>
 
-                {/* Right Specialist List: Triggers Modal instead of Direct Booking */}
+                {/* Right Specialist List */}
                 <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
                   <div style={{ paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
                     <h2 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>Recommended Specialists</h2>
@@ -712,7 +786,6 @@ export default function App() {
                             <span style={{ background: '#fef3c7', color: '#b45309', fontSize: '11px', fontWeight: '800', padding: '3px 8px', borderRadius: '8px' }}>★ {doc.rating || '4.9'}</span>
                           </div>
                           
-                          {/* Clicking opens the custom date/time booking modal */}
                           <button
                             type="button"
                             onClick={() => handleOpenBookingModal(doc)}
@@ -736,7 +809,7 @@ export default function App() {
               </div>
             )}
 
-            {/* Modal for Patient to Choose Date and Time */}
+            {/* Custom Patient Scheduling Modal */}
             {bookingModalDoc && (
               <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                 <div style={{ background: '#ffffff', borderRadius: '24px', padding: '32px', maxWidth: '440px', width: '90%', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #e2e8f0' }}>
