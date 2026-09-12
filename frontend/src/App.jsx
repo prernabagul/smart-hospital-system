@@ -20,6 +20,14 @@ export default function App() {
     occupiedGeneral: 68
   });
 
+  // Patient Custom Booking Modal State
+  const [bookingModalDoc, setBookingModalDoc] = useState(null);
+  const [customBookingForm, setCustomBookingForm] = useState({
+    date: new Date().toISOString().split('T')[0],
+    time: '10:00 AM',
+    reason: ''
+  });
+
   // Doctor Bed Assignment Modal State
   const [bedModalPatient, setBedModalPatient] = useState(null);
   const [selectedBedType, setSelectedBedType] = useState('ICU');
@@ -69,13 +77,77 @@ export default function App() {
     setBookingStatus(null);
   };
 
+  // Open booking modal when patient clicks doctor card
+  const handleOpenBookingModal = (doctor) => {
+    setBookingModalDoc(doctor);
+    setCustomBookingForm({
+      date: new Date().toISOString().split('T')[0],
+      time: '10:00 AM',
+      reason: ''
+    });
+  };
+
+  // Confirm and submit custom patient appointment
+  const handleConfirmBooking = async (e) => {
+    if (e) e.preventDefault();
+    if (!bookingModalDoc) return;
+
+    const docName = typeof bookingModalDoc === 'string' ? bookingModalDoc : bookingModalDoc.name;
+    const docSpecialty = typeof bookingModalDoc === 'object' ? bookingModalDoc.specialty : "General Medicine";
+
+    try {
+      const bookingPayload = {
+        patient_name: user?.name || "Patient",
+        doctor_name: docName,
+        date: customBookingForm.date,
+        time: customBookingForm.time
+      };
+
+      const res = await fetch(`${API_BASE}/book`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingPayload)
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(`Booking Error: ${JSON.stringify(data.detail || data)}`);
+        return;
+      }
+
+      const newRecord = {
+        id: 'APT-' + Math.floor(100000 + Math.random() * 900000),
+        doctorName: docName,
+        patientName: user.name,
+        patientEmail: user.email,
+        specialty: docSpecialty,
+        date: customBookingForm.date,
+        time: customBookingForm.time,
+        reason: customBookingForm.reason || "General Consultation",
+        noShowRisk: data.no_show_risk || "18.5%",
+        status: "Pending Consultation",
+        bedAssigned: "None"
+      };
+
+      const updated = [newRecord, ...appointments];
+      setAppointments(updated);
+      localStorage.setItem('smartcare_all_hospital_appts', JSON.stringify(updated));
+      setBookingStatus({ ...data, doctorName: docName });
+      setBookingModalDoc(null);
+      alert(`Appointment requested for ${customBookingForm.date} at ${customBookingForm.time} with ${docName}!`);
+    } catch (err) {
+      console.error(err);
+      alert("Booking service unavailable.");
+    }
+  };
+
   // Bed Allocation Logic (Doctor)
   const handleAssignBed = () => {
     if (!bedModalPatient) return;
 
     if (selectedBedType === 'ICU') {
       if (beds.occupiedIcu >= beds.totalIcu) {
-        alert("⚠️ ICU is at 100% capacity! Cannot allocate ICU bed.");
+        alert("ICU is at 100% capacity! Cannot allocate ICU bed.");
         return;
       }
       const updatedBeds = { ...beds, occupiedIcu: beds.occupiedIcu + 1 };
@@ -83,7 +155,7 @@ export default function App() {
       localStorage.setItem('smartcare_hospital_beds', JSON.stringify(updatedBeds));
     } else {
       if (beds.occupiedGeneral >= beds.totalGeneral) {
-        alert("⚠️ General Ward is full!");
+        alert("General Ward is full!");
         return;
       }
       const updatedBeds = { ...beds, occupiedGeneral: beds.occupiedGeneral + 1 };
@@ -100,7 +172,7 @@ export default function App() {
 
     setAppointments(updatedList);
     localStorage.setItem('smartcare_all_hospital_appts', JSON.stringify(updatedList));
-    alert(`✅ ${selectedBedType} Bed assigned successfully to ${bedModalPatient.patientName || "Patient"}!`);
+    alert(`${selectedBedType} Bed assigned successfully to ${bedModalPatient.patientName || "Patient"}!`);
     setBedModalPatient(null);
   };
 
@@ -217,51 +289,6 @@ export default function App() {
     }
   };
 
-  // Patient: Book Doctor
-  const handleBook = async (doctor) => {
-    const docName = typeof doctor === 'string' ? doctor : doctor.name;
-    const docSpecialty = typeof doctor === 'object' ? doctor.specialty : "General Medicine";
-    try {
-      const bookingPayload = {
-        patient_name: user?.name || "Patient",
-        doctor_name: docName,
-        date: new Date().toISOString().split('T')[0],
-        time: "10:00 AM"
-      };
-      const res = await fetch(`${API_BASE}/book`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingPayload)
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        alert(`Booking Error: ${JSON.stringify(data.detail || data)}`);
-        return;
-      }
-
-      const newRecord = {
-        id: 'APT-' + Math.floor(100000 + Math.random() * 900000),
-        doctorName: docName,
-        patientName: user.name,
-        patientEmail: user.email,
-        specialty: docSpecialty,
-        date: bookingPayload.date,
-        time: bookingPayload.time,
-        noShowRisk: data.no_show_risk || "18.5%",
-        status: "Pending Consultation",
-        bedAssigned: "None"
-      };
-
-      const updated = [newRecord, ...appointments];
-      setAppointments(updated);
-      localStorage.setItem('smartcare_all_hospital_appts', JSON.stringify(updated));
-      setBookingStatus({ ...data, doctorName: docName });
-    } catch (err) {
-      console.error(err);
-      alert("Booking service unavailable.");
-    }
-  };
-
   const handleCancelAppointment = (id) => {
     const filtered = appointments.filter(a => a.id !== id);
     setAppointments(filtered);
@@ -313,7 +340,7 @@ export default function App() {
                 onChange={(e) => setAuthForm({ ...authForm, role: e.target.value })}
                 style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid #cbd5e1', fontSize: '14px', outline: 'none', background: '#ffffff', color: '#0f172a', boxSizing: 'border-box', cursor: 'pointer' }}
               >
-                <option value="Patient">Patient (Self-Triage & Bookings)</option>
+                <option value="Patient">Patient (Self-Triage & Custom Booking)</option>
                 <option value="Clinician">Clinical Practitioner / Doctor</option>
                 <option value="Administrator">Hospital Administrator</option>
               </select>
@@ -334,12 +361,7 @@ export default function App() {
   const icuPercent = Math.round((beds.occupiedIcu / beds.totalIcu) * 100);
   const generalPercent = Math.round((beds.occupiedGeneral / beds.totalGeneral) * 100);
   const patientBookings = appointments.filter(a => a.patientEmail === user.email || a.patientName === user.name);
-
-  // Filter appointments specifically assigned to this doctor (or show pending list)
-  const doctorPendingAppts = appointments.filter(a => 
-    a.status === "Pending Consultation" && 
-    (a.doctorName.toLowerCase().includes(user.name.toLowerCase()) || user.name.toLowerCase().includes(a.doctorName.toLowerCase()) || true)
-  );
+  const doctorPendingAppts = appointments.filter(a => a.status === "Pending Consultation");
 
   return (
     <div style={{ width: '100vw', minHeight: '100vh', background: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif', boxSizing: 'border-box' }}>
@@ -388,7 +410,7 @@ export default function App() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
                 <div>
                   <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>🩺 Pending Consultations & Bed Allocation Desk</h2>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>Review your pending appointment requests, consult patients, and assign ward beds.</p>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>Review pending patient appointment requests, check reasons, and assign ward beds.</p>
                 </div>
                 <div style={{ background: '#fee2e2', color: '#991b1b', padding: '6px 14px', borderRadius: '12px', fontSize: '12px', fontWeight: '700', border: '1px solid #fecaca' }}>
                   Pending Queue: {doctorPendingAppts.length}
@@ -399,7 +421,7 @@ export default function App() {
                 <div style={{ padding: '48px', textAlign: 'center', color: '#94a3b8' }}>
                   <div style={{ fontSize: '36px', marginBottom: '10px' }}>✅</div>
                   <h3 style={{ margin: '0 0 4px 0', color: '#334155', fontSize: '15px' }}>No Pending Consultations</h3>
-                  <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>You have cleared all pending appointments assigned to your practice.</p>
+                  <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>All scheduled patient consultations have been addressed.</p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -414,7 +436,9 @@ export default function App() {
                           </span>
                         </div>
                         <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: '#475569' }}>Requested Doctor: <strong>{apt.doctorName}</strong> ({apt.specialty})</p>
-                        <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Date: {apt.date} at {apt.time} &bull; No-Show Risk: <strong style={{ color: '#059669' }}>{apt.noShowRisk}</strong></p>
+                        <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#0284c7' }}>Scheduled Slot: <strong>{apt.date} at {apt.time}</strong></p>
+                        {apt.reason && <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#475569', fontStyle: 'italic' }}>Reason: &quot;{apt.reason}&quot;</p>}
+                        <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>No-Show Risk: <strong style={{ color: '#059669' }}>{apt.noShowRisk}</strong></p>
                       </div>
 
                       <div style={{ display: 'flex', gap: '10px' }}>
@@ -443,7 +467,7 @@ export default function App() {
                 <div style={{ background: '#ffffff', borderRadius: '24px', padding: '32px', maxWidth: '420px', width: '90%', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #e2e8f0' }}>
                   <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Allocate Hospital Bed</h3>
                   <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b' }}>
-                    Assigning bed for pending patient: <strong>{bedModalPatient.patientName || "Patient"}</strong>
+                    Assigning bed for patient: <strong>{bedModalPatient.patientName || "Patient"}</strong>
                   </p>
 
                   <div style={{ marginBottom: '16px' }}>
@@ -539,7 +563,7 @@ export default function App() {
                   <tr style={{ borderBottom: '2px solid #f1f5f9', color: '#64748b', fontSize: '11px', textTransform: 'uppercase' }}>
                     <th style={{ padding: '12px 8px' }}>Patient / ID</th>
                     <th style={{ padding: '12px 8px' }}>Doctor Assigned</th>
-                    <th style={{ padding: '12px 8px' }}>Schedule</th>
+                    <th style={{ padding: '12px 8px' }}>Schedule Slot</th>
                     <th style={{ padding: '12px 8px' }}>Bed Allocation</th>
                     <th style={{ padding: '12px 8px' }}>Status</th>
                   </tr>
@@ -611,6 +635,7 @@ export default function App() {
               })}
             </div>
 
+            {/* TAB 1: Symptom Checker & Specialist Directory */}
             {activeTab === 'chatbot' && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
                 <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
@@ -664,10 +689,11 @@ export default function App() {
                   </form>
                 </div>
 
+                {/* Right Specialist List: Triggers Modal instead of Direct Booking */}
                 <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
                   <div style={{ paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
                     <h2 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>Recommended Specialists</h2>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Qualified doctors for your condition</p>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Select a doctor to choose your date and time slot</p>
                   </div>
 
                   <div style={{ flex: 1, overflowY: 'auto', margin: '16px 0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -685,12 +711,14 @@ export default function App() {
                             </div>
                             <span style={{ background: '#fef3c7', color: '#b45309', fontSize: '11px', fontWeight: '800', padding: '3px 8px', borderRadius: '8px' }}>★ {doc.rating || '4.9'}</span>
                           </div>
+                          
+                          {/* Clicking opens the custom date/time booking modal */}
                           <button
                             type="button"
-                            onClick={() => handleBook(doc)}
+                            onClick={() => handleOpenBookingModal(doc)}
                             style={{ width: '100%', padding: '10px', background: 'linear-gradient(135deg, #7c3aed, #9333ea)', color: '#ffffff', border: 'none', borderRadius: '12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                           >
-                            Book Appointment
+                            📅 Choose Date & Book Slot
                           </button>
                         </div>
                       ))
@@ -699,7 +727,7 @@ export default function App() {
 
                   {bookingStatus && (
                     <div style={{ padding: '14px', background: '#ecfdf5', border: '1.5px solid #a7f3d0', borderRadius: '16px', color: '#065f46', fontSize: '12px' }}>
-                      <div style={{ fontWeight: '800', marginBottom: '2px' }}>✓ Booking Confirmed!</div>
+                      <div style={{ fontWeight: '800', marginBottom: '2px' }}>Booking Request Sent!</div>
                       <div>Doctor: <strong>{bookingStatus.doctorName}</strong></div>
                       <div>No-Show Risk: <strong>{bookingStatus.no_show_risk || "18.5%"}</strong></div>
                     </div>
@@ -708,6 +736,81 @@ export default function App() {
               </div>
             )}
 
+            {/* Modal for Patient to Choose Date and Time */}
+            {bookingModalDoc && (
+              <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                <div style={{ background: '#ffffff', borderRadius: '24px', padding: '32px', maxWidth: '440px', width: '90%', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #e2e8f0' }}>
+                  <h3 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Schedule Your Appointment</h3>
+                  <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b' }}>
+                    Booking with: <strong>{bookingModalDoc.name}</strong> ({bookingModalDoc.specialty})
+                  </p>
+
+                  <form onSubmit={handleConfirmBooking} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                        Select Preferred Date
+                      </label>
+                      <input
+                        type="date"
+                        min={new Date().toISOString().split('T')[0]}
+                        value={customBookingForm.date}
+                        onChange={(e) => setCustomBookingForm({ ...customBookingForm, date: e.target.value })}
+                        required
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                        Select Time Slot
+                      </label>
+                      <select
+                        value={customBookingForm.time}
+                        onChange={(e) => setCustomBookingForm({ ...customBookingForm, time: e.target.value })}
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
+                      >
+                        <option value="09:00 AM">09:00 AM - Morning Slot</option>
+                        <option value="10:30 AM">10:30 AM - Morning Slot</option>
+                        <option value="01:00 PM">01:00 PM - Afternoon Slot</option>
+                        <option value="03:30 PM">03:30 PM - Evening Slot</option>
+                        <option value="05:00 PM">05:00 PM - Evening Slot</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                        Reason for Visit / Note (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Follow-up consultation or second opinion"
+                        value={customBookingForm.reason}
+                        onChange={(e) => setCustomBookingForm({ ...customBookingForm, reason: e.target.value })}
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
+                      <button
+                        type="submit"
+                        style={{ flex: 1, padding: '12px', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: '#ffffff', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
+                      >
+                        Confirm Booking
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBookingModalDoc(null)}
+                        style={{ padding: '12px 18px', background: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: Disease Risk Predictor with XAI */}
             {activeTab === 'prediction' && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', maxWidth: '960px', margin: '0 auto' }}>
                 <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', border: '1px solid #e2e8f0' }}>
@@ -788,6 +891,7 @@ export default function App() {
               </div>
             )}
 
+            {/* TAB 3: Diagnostic Lab */}
             {activeTab === 'reports' && (
               <div style={{ maxWidth: '640px', margin: '0 auto', background: '#ffffff', borderRadius: '24px', padding: '32px', border: '1px solid #e2e8f0' }}>
                 <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Diagnostic Lab Analysis</h2>
@@ -816,6 +920,7 @@ export default function App() {
               </div>
             )}
 
+            {/* TAB 4: My Bookings */}
             {activeTab === 'appointments' && (
               <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -832,7 +937,7 @@ export default function App() {
                   <div style={{ background: '#ffffff', borderRadius: '24px', padding: '48px', textAlign: 'center', color: '#94a3b8', border: '1px solid #e2e8f0' }}>
                     <div style={{ fontSize: '40px', marginBottom: '10px' }}>📅</div>
                     <h3 style={{ margin: '0 0 4px 0', color: '#334155', fontSize: '15px' }}>No Appointments Booked Yet</h3>
-                    <p style={{ margin: 0, fontSize: '12px' }}>Analyze symptoms in the triage tab to book consultations.</p>
+                    <p style={{ margin: 0, fontSize: '12px' }}>Analyze symptoms in the triage tab to choose a date and book consultations.</p>
                   </div>
                 ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
@@ -849,8 +954,8 @@ export default function App() {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12px' }}>
                           <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-                            <span style={{ display: 'block', color: '#64748b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>Schedule</span>
-                            <span style={{ fontWeight: '700', color: '#0f172a' }}>{apt.date}</span>
+                            <span style={{ display: 'block', color: '#64748b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>Chosen Schedule</span>
+                            <span style={{ fontWeight: '700', color: '#0f172a' }}>{apt.date} • {apt.time}</span>
                           </div>
                           <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
                             <span style={{ display: 'block', color: '#64748b', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase' }}>Bed Status</span>
@@ -859,6 +964,12 @@ export default function App() {
                             </span>
                           </div>
                         </div>
+
+                        {apt.reason && (
+                          <div style={{ fontSize: '12px', color: '#64748b', background: '#f8fafc', padding: '8px 12px', borderRadius: '8px' }}>
+                            Note: {apt.reason}
+                          </div>
+                        )}
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
                           <button onClick={() => handleCancelAppointment(apt.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
