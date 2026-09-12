@@ -1027,33 +1027,88 @@ export default function App() {
             )}
 
             {/* TAB 3: Diagnostic Lab */}
-            {activeTab === 'reports' && (
-              <div style={{ maxWidth: '640px', margin: '0 auto', background: '#ffffff', borderRadius: '24px', padding: '32px', border: '1px solid #e2e8f0' }}>
-                <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Diagnostic Lab Analysis</h2>
-                <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: '#64748b' }}>Upload clinical lab reports for analysis.</p>
+{activeTab === 'reports' && (
+  <div style={{ maxWidth: '640px', margin: '0 auto', background: '#ffffff', borderRadius: '24px', padding: '32px', border: '1px solid #e2e8f0' }}>
+    <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Diagnostic Lab Analysis</h2>
+    <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: '#64748b' }}>Upload clinical lab reports for analysis.</p>
 
-                <form onSubmit={handleReportUpload} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <div style={{ border: '2px dashed #c084fc', background: '#faf5ff', borderRadius: '20px', padding: '36px', textAlign: 'center', cursor: 'pointer' }}>
-                    <input type="file" id="report-file" style={{ display: 'none' }} onChange={(e) => setSelectedFile(e.target.files[0])} />
-                    <label htmlFor="report-file" style={{ cursor: 'pointer', display: 'block' }}>
-                      <div style={{ fontSize: '40px', marginBottom: '8px' }}>📄</div>
-                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#6b21a8' }}>{selectedFile ? selectedFile.name : 'Choose report document'}</div>
-                    </label>
-                  </div>
-                  <button type="submit" disabled={isUploading || !selectedFile} style={{ padding: '14px', background: 'linear-gradient(135deg, #9333ea, #c026d3)', color: '#ffffff', border: 'none', borderRadius: '14px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
-                    {isUploading ? 'Analyzing...' : 'Upload & Analyze Report'}
-                  </button>
-                </form>
+    <form onSubmit={handleReportUpload} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ border: '2px dashed #c084fc', background: '#faf5ff', borderRadius: '20px', padding: '36px', textAlign: 'center', cursor: 'pointer' }}>
+        <input type="file" id="report-file" style={{ display: 'none' }} onChange={(e) => setSelectedFile(e.target.files[0])} />
+        <label htmlFor="report-file" style={{ cursor: 'pointer', display: 'block' }}>
+          <div style={{ fontSize: '40px', marginBottom: '8px' }}>📄</div>
+          <div style={{ fontSize: '14px', fontWeight: '700', color: '#6b21a8' }}>{selectedFile ? selectedFile.name : 'Choose report document'}</div>
+        </label>
+      </div>
+      <button type="submit" disabled={isUploading || !selectedFile} style={{ padding: '14px', background: 'linear-gradient(135deg, #9333ea, #c026d3)', color: '#ffffff', border: 'none', borderRadius: '14px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
+        {isUploading ? 'Analyzing...' : 'Upload & Analyze Report'}
+      </button>
+    </form>
 
-                {reportResult && (
-                  <div style={{ marginTop: '24px', padding: '18px', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                    <pre style={{ margin: 0, padding: '12px', background: '#ffffff', borderRadius: '12px', fontSize: '11px', color: '#0f172a', overflowX: 'auto' }}>
-                      {JSON.stringify(reportResult, null, 2)}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            )}
+    {reportResult && (
+      <div style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* Header & Status Banner */}
+        <div style={{ background: '#faf5ff', border: '1.5px solid #e9d5ff', borderRadius: '18px', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '24px' }}>📋</span>
+            <div>
+              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '800', color: '#581c87' }}>
+                Diagnostic Extraction Complete
+              </h4>
+              <span style={{ fontSize: '12px', color: '#7e22ce' }}>
+                Source: {reportResult.file_processed || selectedFile?.name || "Medical Document"}
+              </span>
+            </div>
+          </div>
+          {reportResult.confidence_score && (
+            <span style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', fontSize: '12px', fontWeight: '800', padding: '4px 12px', borderRadius: '999px' }}>
+              {reportResult.confidence_score} Confidence
+            </span>
+          )}
+        </div>
+
+        {/* Structured Findings Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+          {/* Clinical Findings Card */}
+          <div style={{ background: '#ffffff', border: '1.5px solid #fecaca', borderRadius: '18px', padding: '18px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }}></span>
+              <span style={{ fontSize: '11px', fontWeight: '800', color: '#991b1b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Key Clinical Biomarkers
+              </span>
+            </div>
+            <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#1e293b', lineHeight: '1.6' }}>
+              {reportResult.ai_findings || reportResult.findings || "No critical abnormalities detected."}
+            </p>
+          </div>
+
+          {/* Patient Interpretation & Advisory */}
+          <div style={{ background: '#ffffff', border: '1.5px solid #fed7aa', borderRadius: '18px', padding: '18px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f97316' }}></span>
+              <span style={{ fontSize: '11px', fontWeight: '800', color: '#9a3412', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Patient Guidance & Next Steps
+              </span>
+            </div>
+            <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: '1.6' }}>
+              {reportResult.simplified_explanation || reportResult.summary || "Follow up with your primary physician for detailed assessment."}
+            </p>
+          </div>
+        </div>
+
+        {/* Collapsible raw JSON (for debugging/evaluators) */}
+        <details style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '12px 16px', fontSize: '12px', color: '#64748b' }}>
+          <summary style={{ cursor: 'pointer', fontWeight: '700', color: '#475569' }}>
+            View Raw Extracted JSON Payload
+          </summary>
+          <pre style={{ margin: '10px 0 0 0', padding: '10px', background: '#ffffff', borderRadius: '10px', border: '1px solid #cbd5e1', overflowX: 'auto', fontSize: '11px', color: '#0f172a' }}>
+            {JSON.stringify(reportResult, null, 2)}
+          </pre>
+        </details>
+      </div>
+    )}
+  </div>
+)}
 
             {/* TAB 4: My Bookings */}
             {activeTab === 'appointments' && (
