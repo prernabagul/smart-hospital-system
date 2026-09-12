@@ -79,7 +79,6 @@ export default function App() {
       return;
     }
 
-    // Role-Based Access Control Verification
     if (authForm.role === 'Clinician') {
       if (authForm.passkey.trim() !== SECURITY_KEYS.Clinician) {
         setAuthError("⛔ Access Denied: Invalid Medical License / Staff PIN.");
@@ -175,20 +174,20 @@ export default function App() {
       localStorage.setItem('smartcare_all_hospital_appts', JSON.stringify(updated));
       setBookingStatus({ ...data, doctorName: docName });
       setBookingModalDoc(null);
-      alert(`✅ Consultation requested for ${customBookingForm.date} at ${customBookingForm.time} with ${docName}!`);
+      alert(`Consultation scheduled for ${customBookingForm.date} at ${customBookingForm.time} with ${docName}!`);
     } catch (err) {
       console.error(err);
       alert("Booking service unavailable.");
     }
   };
 
-  // Bed Allocation Logic (Doctor)
+  // Doctor Bed Assignment Logic
   const handleAssignBed = () => {
     if (!bedModalPatient) return;
 
     if (selectedBedType === 'ICU') {
       if (beds.occupiedIcu >= beds.totalIcu) {
-        alert("⚠️ ICU is at 100% capacity! Cannot allocate ICU bed.");
+        alert("ICU is at 100% capacity! Cannot allocate ICU bed.");
         return;
       }
       const updatedBeds = { ...beds, occupiedIcu: beds.occupiedIcu + 1 };
@@ -196,7 +195,7 @@ export default function App() {
       localStorage.setItem('smartcare_hospital_beds', JSON.stringify(updatedBeds));
     } else {
       if (beds.occupiedGeneral >= beds.totalGeneral) {
-        alert("⚠️ General Ward is full!");
+        alert("General Ward is full!");
         return;
       }
       const updatedBeds = { ...beds, occupiedGeneral: beds.occupiedGeneral + 1 };
@@ -213,8 +212,48 @@ export default function App() {
 
     setAppointments(updatedList);
     localStorage.setItem('smartcare_all_hospital_appts', JSON.stringify(updatedList));
-    alert(`✅ ${selectedBedType} Bed assigned successfully to ${bedModalPatient.patientName || "Patient"}!`);
+    alert(`${selectedBedType} Bed assigned successfully to ${bedModalPatient.patientName || "Patient"}!`);
     setBedModalPatient(null);
+  };
+
+  // FEATURE 4: Admin Bed Release & Inpatient Discharge Flow
+  const handleAdminReleaseBed = (appointmentId) => {
+    const targetApt = appointments.find(a => a.id === appointmentId);
+    if (!targetApt) return;
+
+    // Check if patient actually holds a bed
+    if (!targetApt.bedAssigned || targetApt.bedAssigned === 'None') {
+      alert("This patient has no active bed allocated.");
+      return;
+    }
+
+    const isIcu = targetApt.bedAssigned.toLowerCase().includes('icu');
+
+    // Free up the corresponding hospital capacity
+    let updatedBeds = { ...beds };
+    if (isIcu) {
+      updatedBeds.occupiedIcu = Math.max(0, updatedBeds.occupiedIcu - 1);
+    } else {
+      updatedBeds.occupiedGeneral = Math.max(0, updatedBeds.occupiedGeneral - 1);
+    }
+    setBeds(updatedBeds);
+    localStorage.setItem('smartcare_hospital_beds', JSON.stringify(updatedBeds));
+
+    // Update appointment record
+    const updatedList = appointments.map(apt => {
+      if (apt.id === appointmentId) {
+        return {
+          ...apt,
+          bedAssigned: 'None',
+          status: 'Discharged / Consultation Closed'
+        };
+      }
+      return apt;
+    });
+
+    setAppointments(updatedList);
+    localStorage.setItem('smartcare_all_hospital_appts', JSON.stringify(updatedList));
+    alert(`Patient ${targetApt.patientName || "Patient"} discharged. 1 ${isIcu ? 'ICU' : 'General Ward'} bed released back to available inventory.`);
   };
 
   // Manual Bed Controls (Administrator)
@@ -398,7 +437,6 @@ export default function App() {
               </select>
             </div>
 
-            {/* GATED PASSCODE ENTRY (APPEARS ONLY FOR DOCTOR & ADMIN) */}
             {isStaff && (
               <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '14px', border: '1.5px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -484,7 +522,7 @@ export default function App() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
                 <div>
                   <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>🩺 Pending Consultations & Bed Allocation Desk</h2>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>Review pending patient appointment requests, check reasons, and assign ward beds.</p>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>Review pending patient requests, examine triage parameters, and allocate ward beds.</p>
                 </div>
                 <div style={{ background: '#fee2e2', color: '#991b1b', padding: '6px 14px', borderRadius: '12px', fontSize: '12px', fontWeight: '700', border: '1px solid #fecaca' }}>
                   Pending Queue: {doctorPendingAppts.length}
@@ -621,49 +659,73 @@ export default function App() {
               </div>
             </div>
 
+            {/* Master Patient Roster with Active Bed Release Button (FEATURE 4) */}
             <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', border: '1px solid #e2e8f0', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Hospital Master Patient Roster</h3>
-                  <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Complete administrative oversight of schedules, beds, and triage records</p>
+                  <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Complete administrative oversight of schedules, active bed releases, and discharge controls</p>
                 </div>
                 <span style={{ background: '#f1f5f9', padding: '6px 14px', borderRadius: '10px', fontSize: '12px', fontWeight: '700', color: '#475569' }}>
                   Live Admin Stream
                 </span>
               </div>
 
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid #f1f5f9', color: '#64748b', fontSize: '11px', textTransform: 'uppercase' }}>
-                    <th style={{ padding: '12px 8px' }}>Patient / ID</th>
-                    <th style={{ padding: '12px 8px' }}>Doctor Assigned</th>
-                    <th style={{ padding: '12px 8px' }}>Schedule Slot</th>
-                    <th style={{ padding: '12px 8px' }}>Bed Allocation</th>
-                    <th style={{ padding: '12px 8px' }}>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.length === 0 ? (
-                    <tr><td colSpan="5" style={{ textAlign: 'center', padding: '32px', color: '#94a3b8' }}>No hospital records present.</td></tr>
-                  ) : (
-                    appointments.map(apt => (
-                      <tr key={apt.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                        <td style={{ padding: '12px 8px', fontWeight: '700', color: '#0f172a' }}>
-                          {apt.patientName || "Patient"} <span style={{ fontSize: '11px', color: '#64748b', display: 'block', fontWeight: '400' }}>{apt.id}</span>
-                        </td>
-                        <td style={{ padding: '12px 8px', color: '#334155' }}>{apt.doctorName}</td>
-                        <td style={{ padding: '12px 8px', color: '#64748b' }}>{apt.date} • {apt.time}</td>
-                        <td style={{ padding: '12px 8px' }}>
-                          <span style={{ background: apt.bedAssigned && apt.bedAssigned !== 'None' ? '#ecfdf5' : '#f1f5f9', color: apt.bedAssigned && apt.bedAssigned !== 'None' ? '#059669' : '#64748b', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700' }}>
-                            {apt.bedAssigned || 'None'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 8px', fontWeight: '800', color: '#059669' }}>{apt.status}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid #f1f5f9', color: '#64748b', fontSize: '11px', textTransform: 'uppercase' }}>
+                      <th style={{ padding: '12px 8px' }}>Patient / ID</th>
+                      <th style={{ padding: '12px 8px' }}>Doctor Assigned</th>
+                      <th style={{ padding: '12px 8px' }}>Schedule Slot</th>
+                      <th style={{ padding: '12px 8px' }}>Bed Allocation</th>
+                      <th style={{ padding: '12px 8px' }}>Status</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'right' }}>Admin Bed Operations</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {appointments.length === 0 ? (
+                      <tr><td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#94a3b8' }}>No hospital records present.</td></tr>
+                    ) : (
+                      appointments.map(apt => {
+                        const hasBed = apt.bedAssigned && apt.bedAssigned !== 'None';
+                        return (
+                          <tr key={apt.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                            <td style={{ padding: '12px 8px', fontWeight: '700', color: '#0f172a' }}>
+                              {apt.patientName || "Patient"} <span style={{ fontSize: '11px', color: '#64748b', display: 'block', fontWeight: '400' }}>{apt.id}</span>
+                            </td>
+                            <td style={{ padding: '12px 8px', color: '#334155' }}>{apt.doctorName}</td>
+                            <td style={{ padding: '12px 8px', color: '#64748b' }}>{apt.date} • {apt.time}</td>
+                            <td style={{ padding: '12px 8px' }}>
+                              <span style={{ background: hasBed ? '#ecfdf5' : '#f1f5f9', color: hasBed ? '#059669' : '#64748b', padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: '700', border: hasBed ? '1px solid #a7f3d0' : '1px solid #e2e8f0' }}>
+                                {hasBed ? `🛏️ ${apt.bedAssigned}` : 'Outpatient (No Bed)'}
+                              </span>
+                            </td>
+                            <td style={{ padding: '12px 8px', fontWeight: '800', color: hasBed ? '#0284c7' : '#059669' }}>
+                              {apt.status}
+                            </td>
+                            <td style={{ padding: '12px 8px', textAlign: 'right' }}>
+                              {hasBed ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleAdminReleaseBed(apt.id)}
+                                  style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}
+                                >
+                                  Discharge & Free Bed
+                                </button>
+                              ) : (
+                                <span style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>
+                                  No Bed Assigned
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -709,7 +771,7 @@ export default function App() {
               })}
             </div>
 
-            {/* TAB 1: Symptom Checker & Specialist Directory */}
+            {/* TAB 1: Symptom Checker */}
             {activeTab === 'chatbot' && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
                 <div style={{ background: '#ffffff', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '540px' }}>
@@ -883,7 +945,7 @@ export default function App() {
               </div>
             )}
 
-            {/* TAB 2: Disease Risk Predictor with XAI */}
+            {/* TAB 2: Risk Predictor */}
             {activeTab === 'prediction' && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', maxWidth: '960px', margin: '0 auto' }}>
                 <div style={{ background: '#ffffff', borderRadius: '24px', padding: '28px', border: '1px solid #e2e8f0' }}>
