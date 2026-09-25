@@ -6,7 +6,7 @@ export const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const displayName = user?.name || user?.fullName || 'Prerna';
+  const displayName = user?.name || user?.name || 'Prerna';
 
   const handleSignOut = () => {
     logout();

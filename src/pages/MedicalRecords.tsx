@@ -69,7 +69,7 @@ export const MedicalRecords: React.FC = () => {
   const { user } = useAuth();
 
   // Dynamic Patient Info from Context
-  const displayName = user?.name || user?.fullName || 'Prerna Bagul';
+  const displayName = user?.name || user?.name || 'Prerna Bagul';
   const patientId = user?.patientId || 'PAT-2026-0001';
   const bloodGroup = user?.bloodGroup || 'O+';
   const allergies = user?.allergies || ['Penicillin', 'Dust Mites', 'Shellfish'];

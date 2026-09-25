@@ -34,7 +34,7 @@ export const getPatientDetailsForBooking = (user: any): Partial<PatientProfileDa
 };
 
 export const PatientProfile: React.FC = () => {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   // Load existing profile from localStorage or fall back to defaults/AuthContext
@@ -102,15 +102,16 @@ export const PatientProfile: React.FC = () => {
     localStorage.setItem('patientProfile', JSON.stringify(formData));
 
     // Update AuthContext session user state
-    if (login) {
-      login({
-        ...user,
-        name: formData.fullName,
-        email: formData.email,
-        bloodGroup: formData.bloodGroup,
-        patientId: formData.patientId,
-      });
-    }
+    const updatedUser = {
+  ...user,
+  name: formData.fullName,
+  fullName: formData.fullName,
+  email: formData.email,
+  bloodGroup: formData.bloodGroup,
+  patientId: formData.patientId,
+};
+// Use updatedUser here:
+localStorage.setItem('active_user_session', JSON.stringify(updatedUser)); 
 
     setIsEditing(false);
     setIsSaved(true);

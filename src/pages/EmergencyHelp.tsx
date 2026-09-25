@@ -34,7 +34,7 @@ export const EmergencyHelp: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
   // Form State for Emergency Request
-  const [patientName, setPatientName] = useState(user?.name || user?.fullName || 'Prerna Bagul');
+  const [patientName, setPatientName] = useState(user?.name || user?.name || 'Prerna Bagul');
   const [patientIdInput, setPatientIdInput] = useState(user?.patientId || 'PAT-2026-0001');
   const [contactNumber, setContactNumber] = useState(user?.phone || '+1 (555) 019-2834');
   const [emergencyType, setEmergencyType] = useState('Chest Pain / Cardiac Event');

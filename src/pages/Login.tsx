@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { user, login, logout } = useAuth();
+  const { user, login, register, logout } = useAuth();
 
   // Tab State: false = Already a User (Sign In), true = New User (Register)
   const [isRegister, setIsRegister] = useState(false);
@@ -32,23 +32,28 @@ export const Login: React.FC = () => {
         return;
       }
 
-      // Handle New User Registration
-      login({
-        id: 'PAT-' + Math.floor(1000 + Math.random() * 9000),
+      // Handle New User Registration using AuthContext
+      const result = register({
+        id: 'PAT-' + Math.floor(100000 + Math.random() * 900000),
         name: fullName || 'New Patient',
         email,
         phone: mobileNumber,
+        password,
         role: 'patient',
       });
+
+      if (!result.success) {
+        setErrorMsg(result.message);
+        return;
+      }
     } else {
-      // Handle Existing User Login
-      login({
-        id: 'PAT-2026-001',
-        name: email.split('@')[0] || 'Patient User',
-        email,
-        phone: mobileNumber,
-        role: 'patient',
-      });
+      // Handle Existing User Login using AuthContext
+      const result = login(email, password);
+
+      if (!result.success) {
+        setErrorMsg(result.message);
+        return;
+      }
     }
 
     // Redirect to Patient Dashboard after successful action

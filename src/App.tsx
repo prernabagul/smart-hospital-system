@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // 1. Context Import
-import { AuthProvider } from './context/AuthContext'; // Make sure useAuth is exported from AuthContext
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 // 2. Component Imports
 import { Login } from './pages/Login';
@@ -21,11 +21,13 @@ import { PatientRecordsSearch } from './pages/PatientRecordsSearch';
 import { Prescription } from './pages/Prescription';
 import { ReportAnalysis } from './pages/ReportAnalysis';
 
-// Updated ProtectedRoute to check for authentication status
+// Updated ProtectedRoute to check AuthContext and active_user_session storage
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  // Check localStorage or AuthContext for logged-in user session
-  const isAuthenticated = !!localStorage.getItem('user') || !!localStorage.getItem('token'); 
-  
+  const { user } = useAuth();
+
+  // Checks AuthContext state or localStorage for the active session
+  const isAuthenticated = !!user || !!localStorage.getItem('active_user_session');
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
@@ -65,7 +67,7 @@ export const App: React.FC = () => {
           <Route path="/appointment-feedback" element={<ProtectedRoute><AppointmentFeedback /></ProtectedRoute>} />
           <Route path="/emergency" element={<ProtectedRoute><EmergencyHelp /></ProtectedRoute>} />
 
-          {/* Default and fallback routes now point to /login */}
+          {/* Default and fallback routes */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
